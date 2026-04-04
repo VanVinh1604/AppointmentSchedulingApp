@@ -1,0 +1,48 @@
+package com.example.appointmentschedulingapp.di
+
+import com.example.appointmentschedulingapp.data.repository.BookingRepositoryImpl
+import com.example.appointmentschedulingapp.data.repository.ClinicRepositoryImpl
+import com.example.appointmentschedulingapp.data.repository.HomeRepositoryImpl
+import com.example.appointmentschedulingapp.domain.repository.BookingRepository
+import com.example.appointmentschedulingapp.domain.repository.ClinicRepository
+import com.example.appointmentschedulingapp.domain.repository.HomeRepository
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+import dagger.Binds
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class RepositoryModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindClinicRepository(
+        impl: ClinicRepositoryImpl
+    ): ClinicRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindHomeRepository(
+        impl: HomeRepositoryImpl
+    ): HomeRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindBookingRepository(
+        impl: BookingRepositoryImpl
+    ): BookingRepository
+
+//    @Binds
+//    @Singleton
+//    abstract fun bindDoctorRepository(
+//        impl: DoctorRepositoryImpl
+//    ): DoctorRepository
+//
+//    @Binds
+//    @Singleton
+//    abstract fun bindPatientRepository(
+//        impl: PatientRepositoryImpl
+//    ): PatientRepository
+}
