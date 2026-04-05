@@ -17,12 +17,14 @@ class HomeRepositoryImpl @Inject constructor(
 
     override suspend fun getQuickActions(): List<HomeAction> =
         withContext(dispatcher){
+
         val snapshot = firebaseDatabase
             .getReference(Config.FIREBASE_HOME_ACTIONS)
             .get()
             .await()
 
         snapshot.children.mapNotNull { child ->
+
             child.getValue(HomeAction::class.java)
         }
     }

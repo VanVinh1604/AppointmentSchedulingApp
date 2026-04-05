@@ -12,5 +12,6 @@ class GetClinicsUseCase @Inject constructor(
     ) {
     suspend operator fun invoke(): List<Clinic>  {
           return  repository.getClinics()
+
         }
 }

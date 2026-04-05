@@ -1,16 +1,13 @@
 package com.example.appointmentschedulingapp.domain.usecase
 
-import com.example.appointmentschedulingapp.di.IoDispatcher
 import com.example.appointmentschedulingapp.domain.model.Booking
 import com.example.appointmentschedulingapp.domain.repository.BookingRepository
 import com.example.appointmentschedulingapp.ui.features.booking.BookingUiState
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
+
 import javax.inject.Inject
 
 class CreateBookingUseCase @Inject constructor(
     private val bookingRepository: BookingRepository,
-//    @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
     suspend operator fun invoke(state: BookingUiState): Result<String> {
 
@@ -30,4 +27,5 @@ class CreateBookingUseCase @Inject constructor(
 
         return bookingRepository.createBooking(booking)
     }
+
 }

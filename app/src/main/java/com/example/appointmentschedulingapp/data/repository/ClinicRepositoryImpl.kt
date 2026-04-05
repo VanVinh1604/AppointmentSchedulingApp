@@ -26,10 +26,11 @@ class ClinicRepositoryImpl @Inject constructor(
 
     override suspend fun getClinicById(id: String): Clinic? =
         withContext(dispatcher){
+
         val snapshot = firebaseDatabase.getReference(Config.FIREBASE_CLINICS)
             .child(id)
             .get()
             .await()
         snapshot.getValue(Clinic::class.java)
-    }
+        }
 }

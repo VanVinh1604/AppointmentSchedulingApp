@@ -62,6 +62,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore") // Thay vì firebase-firestore-ktx
     implementation("com.google.firebase:firebase-database")
 
+
     // ✅ Chỉ giữ Realtime Database
     implementation("com.google.firebase:firebase-database")
 
