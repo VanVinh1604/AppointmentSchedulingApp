@@ -1,160 +1,239 @@
-🏥 Appointment Scheduling App
-Ứng dụng Android đặt lịch khám bệnh được xây dựng theo hướng MVVM + Clean Architecture, tập trung vào trải nghiệm đặt lịch nhanh, dễ mở rộng và phù hợp cho các bài toán thực tế như quản lý cơ sở y tế, bác sĩ, khung giờ khám và hồ sơ bệnh nhân.
+# 🏥 Appointment Scheduling App
 
-✨ Features
-👨‍⚕️ Booking Flow
-•	Chọn cơ sở y tế / bệnh viện / phòng khám
-•	Xem chi tiết cơ sở y tế
-•	Chọn chuyên khoa
-•	Chọn dịch vụ khám
-•	Chọn ngày khám
-•	Chọn khung giờ khám
-•	Chọn hồ sơ bệnh nhân
-•	Xác nhận lịch hẹn
-•	Sinh mã booking ID
-🏥 Clinic Management
-•	Danh sách cơ sở y tế
-•	Chi tiết bệnh viện / phòng khám
-•	Chuyên khoa theo từng cơ sở
-•	Danh sách dịch vụ
-•	Phòng khám khả dụng
-•	Khung giờ khám theo buổi sáng / chiều
-👤 User Features
-•	Đăng nhập bằng số điện thoại
-•	Xác thực OTP
-•	Hồ sơ cá nhân
-•	Danh sách phiếu khám
-•	Thông báo
-•	Chính sách & điều khoản
-🔜 Roadmap
-•	Payment integration
-•	Booking reminder bằng WorkManager
-•	Local notifications
-•	Doctor availability realtime
-•	Firebase sync lịch trống
-•	Medical history
-•	QR ticket check-in
+Modern Android healthcare booking application built with **MVVM + Clean Architecture**, focused on scalable appointment workflows, OTP authentication, and real-time clinic scheduling.
 
-🧱 Architecture
-Dự án áp dụng:
-•	MVVM Architecture
-•	Clean Architecture
-•	Repository Pattern
-•	Single Source of Truth với StateFlow
-•	Navigation Graph modularization
-📂 Project Structure
+![Kotlin](https://img.shields.io/badge/Kotlin-2.0-blue)
+![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Latest-brightgreen)
+![Architecture](https://img.shields.io/badge/Architecture-MVVM%20%2B%20Clean-orange)
+![Firebase](https://img.shields.io/badge/Firebase-OTP-yellow)
+![Platform](https://img.shields.io/badge/Platform-Android-success)
+
+---
+
+## 📱 App Preview
+
+> Add your app screenshots inside `screenshots/` folder.
+
+| Home | Booking | OTP |
+|---|---|---|
+| ![](screenshots/home.png) | ![](screenshots/booking.png) | ![](screenshots/otp.png) |
+
+---
+
+## ✨ Features
+
+### 👨‍⚕️ Booking Flow
+- [x] Select clinic / hospital / medical center
+- [x] View clinic details
+- [x] Choose department
+- [x] Select medical service
+- [x] Pick appointment date
+- [x] Choose available time slot
+- [x] Select patient profile
+- [x] Confirm booking
+- [x] Generate booking ID
+
+### 🏥 Clinic Management
+- [x] Clinic list
+- [x] Clinic detail screen
+- [x] Department by clinic
+- [x] Service catalog
+- [x] Available examination rooms
+- [x] Morning / afternoon time slots
+
+### 👤 User Features
+- [x] Phone number login
+- [x] Firebase OTP authentication
+- [x] Personal profile
+- [x] Appointment history
+- [x] Notifications
+- [x] Policy & terms
+
+---
+
+## 🧱 Architecture
+
+This project follows **MVVM + Clean Architecture**.
+
+```text
+Presentation Layer
+ └── Jetpack Compose + ViewModel + StateFlow
+
+Domain Layer
+ └── UseCases + Repository Contracts + Business Models
+
+Data Layer
+ └── Firebase + Room + Repository Implementations
+```
+
+### ✅ Architectural Principles
+- **MVVM Architecture**
+- **Clean Architecture**
+- **Repository Pattern**
+- **Single Source of Truth with StateFlow**
+- **Navigation Graph Modularization**
+- **Unidirectional Data Flow (UDF)**
+
+---
+
+## 📂 Project Structure
+
+```bash
 app/src/main/java/com/example/appointmentschedulingapp
-│
 ├── data/
 │   ├── local/
+│   ├── remote/
 │   └── repository/
-│
 ├── domain/
 │   ├── model/
 │   ├── repository/
 │   └── usecase/
-│
 ├── ui/
 │   ├── features/
 │   ├── navigation/
 │   └── theme/
-│
 ├── di/
 └── common/
+```
 
-🛠️ Tech Stack
-📱 Android
-•	Kotlin
-•	Jetpack Compose
-•	Material 3
-•	Navigation Compose
-•	ViewModel
-•	StateFlow
-•	Coroutines
-🧠 Architecture & DI
-•	MVVM
-•	Clean Architecture
-•	Repository Pattern
-•	Hilt Dependency Injection
-☁️ Backend / Cloud
-•	Firebase Realtime Database
-•	Firebase Authentication (OTP)
-•	Google Services
-💾 Local Storage
-•	Room Database
-•	DAO Pattern
-⚙️ Async / Background
-•	Kotlin Coroutines
-•	Flow / StateFlow
-•	(roadmap) WorkManager
+---
 
-📦 Main Modules
-Booking
-•	BookingViewModel
-•	CreateBookingUseCase
-•	BookingRepository
-•	BookingRepositoryImpl
-Clinic
-•	ClinicViewModel
-•	GetClinicsUseCase
-•	ClinicRepository
-Home
-•	quick actions
-•	promotion banners
-•	trust section
-•	doctor suggestions
+## 🛠️ Tech Stack
 
-🗃️ Data Models
-Một số model chính:
-•	Clinic
-•	Booking
-•	Doctor
-•	Department
-•	TimeSlot
-•	Appointment
-•	PatientProfile
-•	PaymentTransaction
-Thiết kế model theo hướng:
-•	dễ scale
-•	tách entity rõ ràng
-•	hỗ trợ realtime booking
-•	doctor slot availability
+| Category | Technology |
+|---|---|
+| Language | Kotlin |
+| UI | Jetpack Compose, Material 3 |
+| Architecture | MVVM, Clean Architecture |
+| Dependency Injection | Hilt |
+| Backend / Cloud | Firebase Realtime Database |
+| Authentication | Firebase Phone OTP |
+| Local Storage | Room Database |
+| Async | Coroutines, Flow, StateFlow |
+| Background Jobs | WorkManager (roadmap) |
 
-🚀 How to Run
-1) Clone project
-   git clone git@github.com:VanVinh1604/AppointmentSchedulingApp.git
-2) Open Android Studio
-   Mở project bằng Android Studio Hedgehog hoặc mới hơn.
-3) Firebase config
-   Đặt file:
-   app/google-services.json
-4) Run app
-   ./gradlew installDebug
+---
 
-🎯 Learning Goals
-Project này được xây dựng để nâng cao kỹ năng:
-•	Android app architecture
-•	scalable booking workflow
-•	Firebase realtime data
-•	clean code organization
-•	multi-step form flow
-•	reusable Compose UI
-•	production-ready navigation
+## 📦 Main Modules
 
-👨‍💻 Author
-Bùi Văn Vinh
-•	Android Developer Intern
-•	Software Engineering Student
-•	Focus: Android Native, Kotlin, Clean Architecture
+### Booking
+- `BookingViewModel`
+- `CreateBookingUseCase`
+- `BookingRepository`
+- `BookingRepositoryImpl`
 
-📌 Future Improvements
-•	REST API backend bằng Spring Boot / Node.js...
-•	doctor schedule optimization
-•	payment gateway (MoMo / VNPay)
-•	reminder notification system
-•	hospital dashboard
-•	admin CMS
-•	analytics
-•	CI/CD pipeline
+### Clinic
+- `ClinicViewModel`
+- `GetClinicsUseCase`
+- `ClinicRepository`
 
-Đây là project cá nhân phục vụ học tập, phát triển kỹ năng Android Native và hướng tới sản phẩm có thể scale thực tế trong lĩnh vực healthcare booking.
+### Home
+- Quick actions
+- Promotion banners
+- Trust section
+- Doctor suggestions
+
+---
+
+## 🗃️ Core Data Models
+
+- `Clinic`
+- `Booking`
+- `Doctor`
+- `Department`
+- `TimeSlot`
+- `Appointment`
+- `PatientProfile`
+- `PaymentTransaction`
+
+### 🎯 Design Goals
+- Easy to scale
+- Clear entity separation
+- Realtime booking support
+- Doctor slot availability
+- Backend migration ready
+
+---
+
+## 🚀 Getting Started
+
+### 1) Clone project
+```bash
+git clone git@github.com:VanVinh1604/AppointmentSchedulingApp.git
+```
+
+### 2) Open Android Studio
+Use **Android Studio Hedgehog or newer**.
+
+### 3) Firebase configuration
+Place your Firebase config file here:
+
+```bash
+app/google-services.json
+```
+
+### 4) Run app
+```bash
+./gradlew installDebug
+```
+
+---
+
+## 🎯 Learning Goals
+
+This project was built to strengthen:
+
+- Android app architecture
+- Scalable booking workflow
+- Firebase realtime data handling
+- Clean code organization
+- Multi-step form flow
+- Reusable Compose UI components
+- Production-ready navigation
+- Modern Android development best practices
+
+---
+
+## 🚀 Future Roadmap
+
+- [ ] Payment integration (MoMo / VNPay)
+- [ ] Booking reminder with WorkManager
+- [ ] Local push notifications
+- [ ] Doctor realtime availability
+- [ ] Firebase slot synchronization
+- [ ] Medical history module
+- [ ] QR ticket check-in
+- [ ] REST API backend with Spring Boot / Node.js
+- [ ] Hospital admin dashboard
+- [ ] Analytics tracking
+- [ ] CI/CD pipeline
+
+---
+
+## 🌟 Engineering Highlights
+
+- Multi-step booking state management
+- OTP authentication flow
+- StateFlow Single Source of Truth
+- Reusable Compose components
+- Modular navigation graph
+- Scalable domain-driven package structure
+- Firebase-first architecture with backend migration roadmap
+
+---
+
+## 👨‍💻 Author
+
+**Bùi Văn Vinh**
+- Android Developer Intern
+- Software Engineering Student
+- Focus: **Android Native, Kotlin, Clean Architecture**
+
+---
+
+## 📌 About This Project
+
+This is a personal project built for **learning, portfolio development, and real-world healthcare booking scalability exploration**.
+
+The goal is not only to practice Android Native development, but also to design an application architecture that can evolve into a **production-ready medical appointment platform**.
+
