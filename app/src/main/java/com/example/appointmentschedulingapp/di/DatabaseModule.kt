@@ -2,7 +2,7 @@ package com.example.appointmentschedulingapp.di
 
 import android.content.Context
 import com.example.appointmentschedulingapp.data.local.AppDatabase
-import com.example.appointmentschedulingapp.common.Config
+import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,6 +21,8 @@ object DatabaseModule {
     ): AppDatabase {
         return AppDatabase.getInstance(context)
     }
+
+
 
 //    @Provides
 //    fun provideEventDao(db: AppDatabase) = db.eventDao()

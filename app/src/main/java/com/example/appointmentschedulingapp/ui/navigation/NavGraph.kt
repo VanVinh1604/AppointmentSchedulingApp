@@ -15,7 +15,10 @@ import com.example.appointmentschedulingapp.ui.features.account.AccountScreen
 import com.example.appointmentschedulingapp.ui.features.account.settingContent.PrivacyPolicyScreen
 import com.example.appointmentschedulingapp.ui.features.account.settingContent.TermsOfServiceScreen
 import com.example.appointmentschedulingapp.ui.features.account.settingContent.TermsOfUseScreen
+import com.example.appointmentschedulingapp.ui.features.auth.AuthRoute
 import com.example.appointmentschedulingapp.ui.features.auth.AuthScreen
+import com.example.appointmentschedulingapp.ui.features.auth.AuthViewModel
+import com.example.appointmentschedulingapp.ui.features.auth.OtpRoute
 import com.example.appointmentschedulingapp.ui.features.auth.OtpVerificationScreen
 import com.example.appointmentschedulingapp.ui.features.booking.BookingEvent
 import com.example.appointmentschedulingapp.ui.features.booking.BookingViewModel
@@ -31,8 +34,7 @@ import com.example.appointmentschedulingapp.ui.features.tickets.TicketsScreen
 @Composable
 fun AppNavGraph(navController: NavHostController) {
 
-//    val bookingViewModel: BookingViewModel = viewModel()
-    val sharedBookingViewModel: BookingViewModel = hiltViewModel()
+    val authViewModel: AuthViewModel = hiltViewModel()
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route
@@ -49,79 +51,6 @@ fun AppNavGraph(navController: NavHostController) {
             )
         }
 
-//        composable(Screen.SelectClinic.route) {
-//            // Sử dụng sharedBookingViewModel thay vì gọi lại
-//            SelectClinicScreen(
-//                bookingViewModel = sharedBookingViewModel, // Đảm bảo SelectClinicScreen có nhận tham số viewModel
-//                onBack = { navController.popBackStack() },
-//                onNavigateToDetail = { clinicId ->
-//                    navController.navigate(Screen.ClinicDetail.createRoute(clinicId))
-//                },
-//                onNavigateToBookingStep1 = { navController.navigate(Screen.BookingStep1.route) }
-//            )
-//        }
-
-//        composable(
-//            route = Screen.ClinicDetail.route,
-//            arguments = listOf(
-//                navArgument("clinicId") {
-//                    type = NavType.StringType
-//                }
-//            )
-//        ) { backStackEntry ->
-//
-//            val clinicId = backStackEntry.arguments?.getString("clinicId") ?: ""
-//
-//            ClinicDetailScreen(
-//                clinicId = clinicId,
-//                onBack = { navController.popBackStack() }
-//            )
-//        }
-
-//        composable(Screen.BookingStep1.route) {
-//            val uiState by sharedBookingViewModel.uiState.collectAsState()
-//
-//            LaunchedEffect(Unit) {
-//                sharedBookingViewModel.onEvent(
-//                    BookingEvent.SetStep(1)
-//                )
-//            }
-//            BookingStep1Screen(
-//                uiState = uiState,
-//                onBack = { navController.popBackStack() },
-//                onNext = {
-//                    sharedBookingViewModel.onEvent(
-//                        BookingEvent.SetStep(2)
-//                    )
-//                    navController.navigate("booking_step2")
-//                },
-//                onUpdateSpecialty = { specialty ->
-//                    sharedBookingViewModel.onEvent(
-//                        BookingEvent.UpdateSpecialty(specialty)
-//                    )
-//                }
-//            )
-//        }
-//
-//        composable("booking_step2") {
-//            val uiState by sharedBookingViewModel.uiState.collectAsState()
-//
-//            LaunchedEffect(Unit) {
-//                sharedBookingViewModel.onEvent(
-//                    BookingEvent.SetStep(2)
-//                )
-//            }
-//            BookingStep2Screen(
-//                uiState = uiState,
-//                onPatientSelected = { id, name ->
-//                    sharedBookingViewModel.onEvent(
-//                        BookingEvent.SelectPatient(id, name)
-//                    )
-//                },
-//                onBack = { navController.popBackStack() },
-//                onNext = { /* Điều hướng sang bước 3 */ }
-//            )
-//        }
 
         // Các màn hình khác tạm thời để Text để không bị lỗi Build
         composable(Screen.Ticket.route) {
@@ -150,10 +79,10 @@ fun AppNavGraph(navController: NavHostController) {
 
         // Trong AppNavGraph
         composable(Screen.Auth.route) {
-            AuthScreen(
+            AuthRoute(
+                viewModel = authViewModel,
                 onBack = { navController.popBackStack() },
-                onContinue = { phone ->
-                    // Điều hướng sang màn OTP và gửi kèm số điện thoại
+                onNavigateOtp = { phone ->
                     navController.navigate("otp_verification/$phone")
                 }
             )
@@ -161,21 +90,22 @@ fun AppNavGraph(navController: NavHostController) {
 
         composable(
             route = "otp_verification/{phoneNumber}",
-            arguments = listOf(navArgument("phoneNumber") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val phone = backStackEntry.arguments?.getString("phoneNumber") ?: ""
-            OtpVerificationScreen(
-                phoneNumber = phone,
+            arguments = listOf(navArgument("phoneNumber") {
+                type = NavType.StringType
+            })
+        ) {
+            OtpRoute(
+                viewModel = authViewModel,
                 onBack = { navController.popBackStack() },
-                onVerify = { code ->
-                    // Sau khi xác thực thành công, quay về Home hoặc Account
+                onSuccess = {
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Auth.route) { inclusive = true }
                     }
-                },
-                onResendOtp = { /* Xử lý gửi lại mã */ }
+                }
+
             )
         }
+
         composable(Screen.TermOfService.route) {
             TermsOfServiceScreen(onBack = { navController.popBackStack() })
         }

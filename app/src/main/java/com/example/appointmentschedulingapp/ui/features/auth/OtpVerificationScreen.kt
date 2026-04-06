@@ -24,8 +24,11 @@ fun OtpVerificationScreen(
     phoneNumber: String, // Nhận số điện thoại từ màn trước truyền sang
     onBack: () -> Unit,
     onVerify: (String) -> Unit,
-    onResendOtp: () -> Unit
-) {
+    onResendOtp: () -> Unit,
+    resendSeconds: Int,
+    isLoading: Boolean = false,       // ← thêm
+    errorMessage: String? = null,
+    ) {
     val primaryColor = Color(0xFF1976D2)
     // List chứa 6 giá trị của mã OTP
     val otpValues = remember { mutableStateListOf("", "", "", "", "", "") }
@@ -119,16 +122,27 @@ fun OtpVerificationScreen(
 
             // --- RESEND TEXT ---
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable { onResendOtp() }
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Bạn không nhận được mã? ", fontSize = 14.sp, color = Color.Gray)
                 Text(
-                    text = "Gửi lại mã",
+                    text = "Bạn không nhận được mã? ",
                     fontSize = 14.sp,
-                    color = primaryColor,
-                    fontWeight = FontWeight.Bold
+                    color = Color.Gray
                 )
+
+                if (resendSeconds > 0) {
+                    Text(
+                        text = "Gửi lại sau ${resendSeconds}s",
+                        color = Color.Gray
+                    )
+                } else {
+                    Text(
+                        text = "Gửi lại mã",
+                        color = primaryColor,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.clickable { onResendOtp() }
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -139,9 +153,28 @@ fun OtpVerificationScreen(
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
-                enabled = otpValues.all { it.isNotEmpty() }
+                enabled = otpValues.all { it.isNotEmpty() } && !isLoading  // ← disable khi loading
             ) {
-                Text("XÁC NHẬN", fontWeight = FontWeight.Bold, color = Color.White)
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(22.dp),
+                        color = Color.White,
+                        strokeWidth = 2.5.dp
+                    )
+                } else {
+                    Text("XÁC NHẬN", fontWeight = FontWeight.Bold, color = Color.White)
+                }
+            }
+
+            errorMessage?.let { msg ->
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = msg,
+                    color = Color.Red,
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }

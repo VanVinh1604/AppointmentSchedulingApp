@@ -1,8 +1,10 @@
 package com.example.appointmentschedulingapp.di
 
+import com.example.appointmentschedulingapp.data.repository.AuthRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.BookingRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.ClinicRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.HomeRepositoryImpl
+import com.example.appointmentschedulingapp.domain.repository.AuthRepository
 import com.example.appointmentschedulingapp.domain.repository.BookingRepository
 import com.example.appointmentschedulingapp.domain.repository.ClinicRepository
 import com.example.appointmentschedulingapp.domain.repository.HomeRepository
@@ -33,6 +35,12 @@ abstract class RepositoryModule {
     abstract fun bindBookingRepository(
         impl: BookingRepositoryImpl
     ): BookingRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAuthRepository(
+        impl: AuthRepositoryImpl
+    ): AuthRepository
 
 //    @Binds
 //    @Singleton

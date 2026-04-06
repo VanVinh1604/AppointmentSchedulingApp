@@ -1,16 +1,15 @@
 package com.example.appointmentschedulingapp.domain.usecase
 
-import android.app.Activity
 import com.example.appointmentschedulingapp.domain.repository.AuthRepository
 import javax.inject.Inject
 
-class SendOtpUseCase @Inject constructor(
+class VerifyOtpUseCase @Inject constructor(
     private val repository: AuthRepository
 ) {
     suspend operator fun invoke(
-        activity: Activity,
-        phone: String
-    ): Result<String> {
-        return repository.sendOtp(activity, phone)
+        verificationId: String,
+        otp: String
+    ): Result<Boolean> {
+        return repository.verifyOtp(verificationId, otp)
     }
 }

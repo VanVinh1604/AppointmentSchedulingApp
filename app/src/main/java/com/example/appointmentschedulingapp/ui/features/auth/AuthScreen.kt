@@ -20,11 +20,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun AuthScreen(
     onBack: () -> Unit,
-    onContinue: (String) -> Unit
+    onContinue: (String) -> Unit,
+    isLoading: Boolean = false,        // ← thêm dòng này
+    errorMessage: String? = null,
 ) {
     var phoneNumber by remember { mutableStateOf("") }
     val primaryColor = Color(0xFF1976D2)
@@ -147,14 +150,29 @@ fun AuthScreen(
             // --- CONTINUE BUTTON ---
             Button(
                 onClick = { onContinue(phoneNumber) },
+                enabled = phoneNumber.isNotEmpty() && !isLoading && phoneNumber.length >= 9 ,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
-                enabled = phoneNumber.length >= 9 // Chỉ bật khi nhập đủ số
             ) {
-                Text(text = "TIẾP TỤC", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(22.dp),
+                        color = Color.White,
+                        strokeWidth = 2.5.dp
+                    )
+                } else {
+                    Text("TIẾP TỤC", fontWeight = FontWeight.Bold, color = Color.White)
+                }            }
+            errorMessage?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = it,
+                    color = Color.Red,
+                    fontSize = 13.sp
+                )
             }
         }
 
