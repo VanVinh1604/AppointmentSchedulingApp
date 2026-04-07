@@ -18,12 +18,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.appointmentschedulingapp.ui.components.feedback.AuthProcessingOverlay
 
 @Composable
 fun OtpVerificationScreen(
     phoneNumber: String, // Nhận số điện thoại từ màn trước truyền sang
     onBack: () -> Unit,
     onVerify: (String) -> Unit,
+    showOverlay: Boolean = false,
+    authSuccess: Boolean = false,
+    authMessage: String = "",
     onResendOtp: () -> Unit,
     resendSeconds: Int,
     isLoading: Boolean = false,       // ← thêm
@@ -33,6 +37,11 @@ fun OtpVerificationScreen(
     // List chứa 6 giá trị của mã OTP
     val otpValues = remember { mutableStateListOf("", "", "", "", "", "") }
 
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ){
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -178,7 +187,14 @@ fun OtpVerificationScreen(
             }
         }
     }
+    AuthProcessingOverlay(
+        visible = showOverlay,
+        isSuccess = authSuccess,
+        message = authMessage
+    )
+    }
 }
+
 
 @Composable
 fun OtpBox(value: String, onValueChange: (String) -> Unit) {

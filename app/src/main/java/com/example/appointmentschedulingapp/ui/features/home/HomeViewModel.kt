@@ -40,9 +40,23 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    // Trong HomeViewModel.kt
     fun onActionClicked(action: HomeAction) {
-        viewModelScope.launch {
-            _event.emit(HomeEvent.Navigate(action.destination))
+        val route = when (action.iconName) {
+            "clinic" -> "select_clinic"
+            "specialty" -> "specialty_screen"
+            // Thêm các trường hợp khác ở đây...
+            else -> null // Trả về null thay vì route sai
+        }
+
+        route?.let {
+            viewModelScope.launch {
+                _event.emit(HomeEvent.Navigate(it))
+            }
+        } ?: run {
+            // Log hoặc thông báo "Tính năng đang phát triển" thay vì chuyển trang
+            println("Feature not implemented for: ${action.title}")
         }
     }
+
 }

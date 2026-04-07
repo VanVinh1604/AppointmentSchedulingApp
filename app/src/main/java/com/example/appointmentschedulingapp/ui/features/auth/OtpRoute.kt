@@ -16,6 +16,7 @@ fun OtpRoute(
     OtpVerificationScreen(
         phoneNumber = state.phone,
         onBack = onBack,
+
         resendSeconds = state.resendSeconds,
         isLoading = state.isLoading,         // ← thêm
         errorMessage = state.error,           // ← thêm
@@ -24,7 +25,11 @@ fun OtpRoute(
         },
         onResendOtp = {
             activity?.let { viewModel.sendOtp(it, state.phone) }
-        }
+        },
+        showOverlay = state.showAuthOverlay,
+        authSuccess = state.authSuccess,
+        authMessage = state.authMessage
+
     )
 
     LaunchedEffect(Unit) {

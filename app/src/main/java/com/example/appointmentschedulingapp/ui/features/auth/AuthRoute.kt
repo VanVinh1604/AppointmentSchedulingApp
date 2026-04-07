@@ -1,9 +1,7 @@
 package com.example.appointmentschedulingapp.ui.features.auth
 
-import android.app.Activity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.*
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable

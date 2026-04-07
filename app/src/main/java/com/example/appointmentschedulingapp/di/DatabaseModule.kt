@@ -2,7 +2,6 @@ package com.example.appointmentschedulingapp.di
 
 import android.content.Context
 import com.example.appointmentschedulingapp.data.local.AppDatabase
-import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

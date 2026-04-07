@@ -8,8 +8,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.appointmentschedulingapp.ui.navigation.AppNavGraph
 import com.example.appointmentschedulingapp.ui.navigation.MyBottomBar
@@ -26,22 +29,29 @@ class MainActivity : ComponentActivity() {
             AppointmentSchedulingAppTheme { // Theme của app bạn
                 // 1. Khởi tạo Controller ở cấp cao nhất
                 val navController = rememberNavController()
+                val sessionViewModel: UserSessionViewModel =
+                    hiltViewModel()
+
+                val session by sessionViewModel.session.collectAsState()
+
 
                 // 2. Sử dụng Scaffold để làm khung có BottomBar [cite: 14]
                 Scaffold(
                     bottomBar = {
-                        // Đây là nơi bạn sẽ đặt BottomNavigationBar (tạo sau)
                         MyBottomBar(navController)
-//                        Text("Bottom Bar đây nè") // test thử
-
                     }
                 ) { innerPadding ->
-                    // 3. Gọi NavGraph và truyền padding vào để không bị đè bởi BottomBar
                     Box(modifier = Modifier.padding(innerPadding)) {
-                        AppNavGraph(navController = navController)
+                        AppNavGraph(
+                            navController = navController,
+                            session = session,
+                            onLogout = {
+                                sessionViewModel.logout {
+                                    navController.navigate("auth")
+                                }
+                            }
+                        )
                     }
-
-
                 }
             }
         }

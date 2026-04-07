@@ -4,10 +4,12 @@ import com.example.appointmentschedulingapp.data.repository.AuthRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.BookingRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.ClinicRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.HomeRepositoryImpl
+import com.example.appointmentschedulingapp.data.repository.UserSessionRepositoryImpl
 import com.example.appointmentschedulingapp.domain.repository.AuthRepository
 import com.example.appointmentschedulingapp.domain.repository.BookingRepository
 import com.example.appointmentschedulingapp.domain.repository.ClinicRepository
 import com.example.appointmentschedulingapp.domain.repository.HomeRepository
+import com.example.appointmentschedulingapp.domain.repository.UserSessionRepository
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
@@ -23,6 +25,12 @@ abstract class RepositoryModule {
     abstract fun bindClinicRepository(
         impl: ClinicRepositoryImpl
     ): ClinicRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUserSessionRepository(
+        impl: UserSessionRepositoryImpl
+    ): UserSessionRepository
 
     @Binds
     @Singleton

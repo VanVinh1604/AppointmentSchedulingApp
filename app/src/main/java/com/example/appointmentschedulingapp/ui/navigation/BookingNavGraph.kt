@@ -7,7 +7,9 @@ import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.appointmentschedulingapp.ui.features.booking.*
 import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingStep1Screen
 import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingStep2Screen
@@ -28,6 +30,17 @@ fun NavGraphBuilder.bookingNavGraph(
             onNavigateToBookingStep1 = {
                 navController.navigate(Screen.BookingStep1.route)
             }
+        )
+    }
+
+    composable(
+        route = "clinic_detail/{clinicId}",
+        arguments = listOf(navArgument("clinicId") { type = NavType.StringType })
+    ) { backStackEntry ->
+        val id = backStackEntry.arguments?.getString("clinicId") ?: ""
+        ClinicDetailScreen(
+            clinicId = id,
+            onBack = { navController.popBackStack() }
         )
     }
 

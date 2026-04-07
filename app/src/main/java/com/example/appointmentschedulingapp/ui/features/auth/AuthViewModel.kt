@@ -1,10 +1,11 @@
 package com.example.appointmentschedulingapp.ui.features.auth
 
 import android.app.Activity
-import android.util.Log.e
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appointmentschedulingapp.core.helper.ErrorHelper
+import com.example.appointmentschedulingapp.domain.usecase.CheckProfileUseCase
+import com.example.appointmentschedulingapp.domain.usecase.CreateUserProfileUseCase
 import com.example.appointmentschedulingapp.domain.usecase.SendOtpUseCase
 import com.example.appointmentschedulingapp.domain.usecase.VerifyOtpUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +19,9 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val sendOtpUseCase: SendOtpUseCase,
-    private val verifyOtpUseCase: VerifyOtpUseCase
+    private val verifyOtpUseCase: VerifyOtpUseCase,
+    private val checkProfileUseCase: CheckProfileUseCase,
+    private val createUserProfileUseCase: CreateUserProfileUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthUiState())
@@ -60,28 +63,40 @@ class AuthViewModel @Inject constructor(
         val verificationId = _uiState.value.verificationId ?: return
 
         viewModelScope.launch {
-            _uiState.update { state ->
-                state.copy(isLoading = true)
-            }
+            _uiState.update { it.copy(isLoading = true) }
 
             verifyOtpUseCase(verificationId, otp)
                 .onSuccess {
-                    _uiState.update { state ->
-                        state.copy(isLoading = false)
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            showAuthOverlay = true,
+                            authSuccess = false,
+                            authMessage = "Đang xác thực tài khoản..."
+                        )
                     }
+                    delay(1200)
 
+                    checkProfileUseCase()
+                        .onSuccess { isNewUser ->
+                            if (isNewUser) {
+                                _uiState.update { it.copy(authMessage = "Đang tạo hồ sơ...") }
+                                createUserProfileUseCase(_uiState.value.phone)
+                            }
+                        }
+
+                    // ✅ Session đã được lưu trong AuthRepositoryImpl.verifyOtp()
+                    // Không cần làm gì thêm ở đây
+
+                    _uiState.update {
+                        it.copy(authSuccess = true, authMessage = "Đăng nhập thành công")
+                    }
+                    delay(800)
                     _event.send(AuthEvent.NavigateToHome)
                 }
                 .onFailure { exception ->
                     val message = ErrorHelper.toFriendlyMessage(exception)
-
-                    _uiState.update { state ->
-                        state.copy(
-                            isLoading = false,
-                            error = message
-                        )
-                    }
-
+                    _uiState.update { it.copy(isLoading = false, error = message) }
                     _event.send(AuthEvent.ShowError(message))
                 }
         }

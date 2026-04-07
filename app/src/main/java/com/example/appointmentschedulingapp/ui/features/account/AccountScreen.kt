@@ -23,7 +23,11 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(onNavigateToTerms: () -> Unit, onNavigateToPrivacy: () -> Unit,
-                  onNavigateToService: () -> Unit,onNavigateToAuth:() -> Unit) {
+                  onNavigateToService: () -> Unit,onNavigateToAuth:() -> Unit,
+                  isLoggedIn: Boolean = false,
+                  phoneNumber: String = "",
+                  onLogout: () -> Unit = {}
+) {
     val primaryColor = Color(0xFF1976D2)
     val dividerColor = Color(0xFFEEEEEE)
     val scrollState = rememberScrollState()
@@ -81,13 +85,38 @@ fun AccountScreen(onNavigateToTerms: () -> Unit, onNavigateToPrivacy: () -> Unit
                         )
                     }
                     Spacer(modifier = Modifier.height(12.dp))
-                    Text("Username", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-                    Text("Đăng nhập / Đăng ký", color = Color.White.copy(alpha = 0.8f),
-                        fontSize = 14.sp,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .clickable { onNavigateToAuth() }
-                            .padding(4.dp))
+                    Text(
+                        text = if (isLoggedIn && phoneNumber.isNotEmpty())
+                            phoneNumber
+                        else
+                            "Khách",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp
+                    )
+
+                    // ✅ Hiển thị "Đăng xuất" hay "Đăng nhập / Đăng ký" tuỳ trạng thái
+                    if (isLoggedIn) {
+                        Text(
+                            "Đăng xuất",
+                            color = Color.White.copy(alpha = 0.8f),
+                            fontSize = 14.sp,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .clickable { onLogout() }
+                                .padding(4.dp)
+                        )
+                    } else {
+                        Text(
+                            "Đăng nhập / Đăng ký",
+                            color = Color.White.copy(alpha = 0.8f),
+                            fontSize = 14.sp,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .clickable { onNavigateToAuth() }
+                                .padding(4.dp)
+                        )
+                    }
                 }
             }
 

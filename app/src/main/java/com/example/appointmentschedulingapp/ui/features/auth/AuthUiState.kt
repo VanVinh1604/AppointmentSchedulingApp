@@ -9,6 +9,9 @@ data class AuthUiState(
     val isOtpSent: Boolean = false,
     val isVerified: Boolean = false,
 
-    val resendSeconds: Int = 60
+    val resendSeconds: Int = 60,
+    val showAuthOverlay: Boolean = false,
+    val authSuccess: Boolean = false,
+    val authMessage: String = ""
 
 )

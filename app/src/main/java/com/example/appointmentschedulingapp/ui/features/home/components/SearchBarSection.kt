@@ -29,9 +29,18 @@ fun HomeHeader(username: String) {
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column {
-            Text("Xin chào,", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-            Text(username, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
-        }
+            Text(
+                text = if (username == "Khách") "Chào mừng bạn!" else "Xin chào,",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
+            if (username != "Khách") {
+                Text(
+                    text = username,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }        }
     }
 }
 
