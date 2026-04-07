@@ -15,12 +15,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.appointmentschedulingapp.domain.model.Clinic
 import com.example.appointmentschedulingapp.ui.features.booking.ClinicViewModel
 
@@ -103,21 +108,19 @@ fun HospitalItem(
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             // Hiển thị Banner/Image nếu có, nếu không dùng Placeholder
-            Box(
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(clinic.imageUrl) // Link Cloudinary từ Firebase
+                    .crossfade(true) // Hiệu ứng hiện ảnh mượt mà
+                    .build(),
+                contentDescription = clinic.name,
                 modifier = Modifier
-                    .height(100.dp)
+                    .height(110.dp) // Tăng nhẹ chiều cao cho đẹp
                     .fillMaxWidth()
-                    .background(Color(0xFFF5F5F5), RoundedCornerShape(8.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                // Ở đây bạn có thể dùng AsyncImage (Coil) để load clinic.imageUrl
-                Icon(
-                    imageVector = Icons.Default.Business,
-                    contentDescription = null,
-                    tint = Color.LightGray,
-                    modifier = Modifier.size(40.dp)
-                )
-            }
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFFF5F5F5)),
+                contentScale = ContentScale.Crop // Cực kỳ quan trọng: Để ảnh lấp đầy khung không bị méo
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 

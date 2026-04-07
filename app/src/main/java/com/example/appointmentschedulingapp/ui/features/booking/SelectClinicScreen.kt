@@ -17,11 +17,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.appointmentschedulingapp.domain.model.Clinic
 import com.example.appointmentschedulingapp.ui.features.booking.components.BookingTypeSheetContent
 
@@ -186,14 +189,15 @@ fun ClinicCard( clinic: Clinic,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Logo placeholder
-                Box(
+                AsyncImage(
+                    model = clinic.imageUrl,
+                    contentDescription = null,
                     modifier = Modifier
-                        .size(60.dp)
-                        .background(Color(0xFFF0F0F0), RoundedCornerShape(8.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(Icons.Default.Business, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(30.dp))
-                }
+                        .size(65.dp) // Tăng kích thước nhẹ cho dễ nhìn
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color(0xFFF0F0F0)),
+                    contentScale = ContentScale.Crop
+                )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
                     Text(

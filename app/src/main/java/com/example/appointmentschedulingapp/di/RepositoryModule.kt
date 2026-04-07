@@ -3,11 +3,13 @@ package com.example.appointmentschedulingapp.di
 import com.example.appointmentschedulingapp.data.repository.AuthRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.BookingRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.ClinicRepositoryImpl
+import com.example.appointmentschedulingapp.data.repository.DoctorRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.HomeRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.UserSessionRepositoryImpl
 import com.example.appointmentschedulingapp.domain.repository.AuthRepository
 import com.example.appointmentschedulingapp.domain.repository.BookingRepository
 import com.example.appointmentschedulingapp.domain.repository.ClinicRepository
+import com.example.appointmentschedulingapp.domain.repository.DoctorRepository
 import com.example.appointmentschedulingapp.domain.repository.HomeRepository
 import com.example.appointmentschedulingapp.domain.repository.UserSessionRepository
 import dagger.Module
@@ -50,15 +52,10 @@ abstract class RepositoryModule {
         impl: AuthRepositoryImpl
     ): AuthRepository
 
-//    @Binds
-//    @Singleton
-//    abstract fun bindDoctorRepository(
-//        impl: DoctorRepositoryImpl
-//    ): DoctorRepository
-//
-//    @Binds
-//    @Singleton
-//    abstract fun bindPatientRepository(
-//        impl: PatientRepositoryImpl
-//    ): PatientRepository
+    @Binds
+    @Singleton
+    abstract fun bindDoctorRepository(
+        doctorRepositoryImpl: DoctorRepositoryImpl
+    ): DoctorRepository
+
 }

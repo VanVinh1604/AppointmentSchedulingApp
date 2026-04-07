@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.traceEventEnd
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -20,10 +19,14 @@ import com.example.appointmentschedulingapp.ui.features.home.components.*
 @Composable
 fun HomeScreen(onNavigate: (String) -> Unit,
                session: User,
+               doctorViewModel: DoctorViewModel = hiltViewModel(),
                viewModel: HomeViewModel = hiltViewModel()
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
+    val doctors by doctorViewModel.doctors.collectAsState()
+    val viewModel: HomeViewModel = hiltViewModel()
+    val trustedClinics by viewModel.trustedClinics.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.event.collect { event ->
@@ -37,6 +40,9 @@ fun HomeScreen(onNavigate: (String) -> Unit,
                 }
             }
         }
+    }
+    LaunchedEffect(Unit) {
+        doctorViewModel.loadDoctors()
     }
     Scaffold(
         containerColor = Color(0xFFF8F9FA)
@@ -63,7 +69,7 @@ fun HomeScreen(onNavigate: (String) -> Unit,
                         onActionClick = viewModel::onActionClicked
                     )
                 }
-                item { TrustSectionNew() }
+                item { TrustSectionNew(clinics = trustedClinics) }
 // Trong HomeScreen.kt
                 item{HospitalSection(
                     onViewAllClick = {
@@ -78,7 +84,14 @@ fun HomeScreen(onNavigate: (String) -> Unit,
                     }
                 )}
                 item { PromotionBanner() }
-                item { DoctorSection() }
+                item {
+                    // Truyền danh sách bác sĩ vào đây
+                    DoctorSection(
+                        doctors = doctors,
+                        onViewAllClick = { onNavigate("all_doctors") },
+                        onDoctorClick = { doctorId -> onNavigate("doctor_detail/$doctorId") }
+                    )
+                }
                 item { CareSection() }
                 // Khoảng trống để không bị chạm Bottom Nav
                 item { Spacer(modifier = Modifier.height(5.dp)) }

@@ -8,15 +8,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.example.appointmentschedulingapp.domain.model.Clinic
 
 @Composable
-fun TrustSectionNew() {
+fun TrustSectionNew(
+    clinics: List<Clinic>
+) {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -30,24 +37,42 @@ fun TrustSectionNew() {
 
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
         ) {
-            PartnerItem("BV Chợ Rẫy")
-            PartnerItem("BV Đại học Y Dược")
-            PartnerItem("FV Hospital")
+            clinics.forEach { clinic ->
+                PartnerItem(clinic)
+            }
         }
     }
 }
 
 @Composable
-fun PartnerItem(name: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
+fun PartnerItem(clinic: Clinic) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(90.dp) // fix width để item đều nhau
+    ) {
+        AsyncImage(
+            model = clinic.imageUrl,
+            contentDescription = clinic.name,
             modifier = Modifier
-                .size(50.dp)
-                .background(Color(0xFFE0E0E0), RoundedCornerShape(8.dp))
+                .size(56.dp)
+                .clip(RoundedCornerShape(26.dp))
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(name, style = MaterialTheme.typography.labelSmall, fontSize = 10.sp)
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Text(
+            text = clinic.name,
+            style = MaterialTheme.typography.labelSmall,
+            fontSize = 10.sp,
+            maxLines = 2,
+            lineHeight = 12.sp,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }

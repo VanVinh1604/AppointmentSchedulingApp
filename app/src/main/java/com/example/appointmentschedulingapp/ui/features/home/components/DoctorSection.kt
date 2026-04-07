@@ -1,20 +1,34 @@
 package com.example.appointmentschedulingapp.ui.features.home.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.example.appointmentschedulingapp.domain.model.Doctor
 
 @Composable
-fun DoctorSection() {
+fun DoctorSection(
+    doctors: List<Doctor>, // Nhận danh sách từ HomeScreen
+    onViewAllClick: () -> Unit = {},
+    onDoctorClick: (String) -> Unit = {}
+) {
+    val limitedDoctors = remember(doctors) {
+        doctors.take(10)
+    }
     Column(modifier = Modifier.padding(16.dp)) {
         Row(modifier = Modifier .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -27,27 +41,70 @@ fun DoctorSection() {
 
         Text("Khám bệnh qua video", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         Spacer(modifier = Modifier.height(12.dp))
-        LazyRow {
-            items(5) { DoctorItem() }
+        LazyRow(
+            contentPadding = PaddingValues(end = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp) // Khoảng cách giữa các item
+        ) {
+            // Sử dụng danh sách đã được giới hạn
+            items(limitedDoctors, key = { it.id }) { doctor ->
+                DoctorItem(
+                    doctor = doctor,
+                    onClick = { onDoctorClick(doctor.id) }
+                )
+            }
         }
     }
 }
 
 @Composable
-fun DoctorItem() {
+fun DoctorItem(
+    doctor: Doctor,
+    onClick: () -> Unit
+) {
     Card(
-        modifier = Modifier.width(180.dp).padding(end = 12.dp),
+        modifier = Modifier
+            .width(170.dp) // Chỉ dùng 1 Card duy nhất
+            .padding(end = 12.dp)
+            .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(2.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Box(modifier = Modifier.height(100.dp).fillMaxWidth().background(Color.LightGray, RoundedCornerShape(8.dp)))
+        Column(modifier = Modifier.padding(12.dp)) { // Dùng Column để xếp chồng
+            AsyncImage(
+                model = doctor.imageUrl,
+                contentDescription = doctor.fullName,
+                modifier = Modifier
+                    .height(110.dp)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color.LightGray),
+                contentScale = ContentScale.Crop
+            )
             Spacer(modifier = Modifier.height(8.dp))
-            Text("⭐ 4.8", fontSize = 12.sp)
-            Text("BS. Nguyễn Văn A", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-            Text("Tim mạch", fontSize = 12.sp, color = Color.Gray)
-            Text("200.000đ", color = Color(0xFF1976D2), fontWeight = FontWeight.Bold)
+
+            // SỬ DỤNG DỮ LIỆU TỪ OBJECT DOCTOR Ở ĐÂY
+            Text("⭐ ${doctor.rating}", fontSize = 12.sp, color = Color(0xFFFFB300))
+
+            Text(
+                text = doctor.fullName,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                maxLines = 1
+            )
+
+            Text(
+                text = doctor.title, // Thay cho "Tim mạch" hoặc dùng mapping khoa
+                fontSize = 12.sp,
+                color = Color.Gray,
+                maxLines = 1
+            )
+
+            Text(
+                text = "200.000đ",
+                color = Color(0xFF1976D2),
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }

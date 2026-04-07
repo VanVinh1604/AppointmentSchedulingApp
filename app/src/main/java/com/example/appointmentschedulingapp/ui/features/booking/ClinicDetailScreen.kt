@@ -15,11 +15,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,22 +101,18 @@ fun ClinicDetailScreen(
                     .fillMaxWidth()
                     .height(220.dp)
             ) {
-                Box(
+                // 1. ẢNH BÌA (BANNER) - Thay thế cho Box màu xám
+                AsyncImage(
+                    model = clinicData.imageUrl,
+                    contentDescription = "Clinic Banner",
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
-                        .background(Color.LightGray)
-                ) {
-                    Icon(
-                        Icons.Default.Image,
-                        null,
-                        Modifier
-                            .align(Alignment.Center)
-                            .size(50.dp),
-                        Color.White
-                    )
-                }
+                        .background(Color.LightGray),
+                    contentScale = ContentScale.Crop // Cắt ảnh cho vừa khung
+                )
 
+                // 2. LOGO TRÒN - Thay thế cho Surface chứa Icon Business
                 Surface(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
@@ -124,17 +122,14 @@ fun ClinicDetailScreen(
                     border = BorderStroke(3.dp, Color.White),
                     shadowElevation = 4.dp
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.background(Color.White)
-                    ) {
-                        Icon(
-                            Icons.Default.Business,
-                            null,
-                            Modifier.size(40.dp),
-                            primaryColor
-                        )
-                    }
+                    AsyncImage(
+                        model = clinicData.imageUrl, // Dùng cùng link ảnh hoặc link logo riêng
+                        contentDescription = "Clinic Logo",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.White),
+                        contentScale = ContentScale.Crop
+                    )
                 }
             }
 

@@ -16,6 +16,7 @@ import com.example.appointmentschedulingapp.ui.features.account.settingContent.T
 import com.example.appointmentschedulingapp.ui.features.auth.AuthRoute
 import com.example.appointmentschedulingapp.ui.features.auth.AuthViewModel
 import com.example.appointmentschedulingapp.ui.features.auth.OtpRoute
+import com.example.appointmentschedulingapp.ui.features.doctor.DoctorDetailScreen
 
 import com.example.appointmentschedulingapp.ui.features.home.HomeScreen
 import com.example.appointmentschedulingapp.ui.features.notifications.NotificationsScreen
@@ -46,6 +47,25 @@ fun AppNavGraph(navController: NavHostController,
             )
         }
 
+        composable(
+            route = "doctor_detail/{doctorId}",
+            arguments = listOf(
+                navArgument("doctorId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val doctorId = backStackEntry.arguments?.getString("doctorId") ?: ""
+
+            // Gọi màn hình Detail đã thiết kế chuyên nghiệp ở bước trước
+            DoctorDetailScreen(
+                doctorId = doctorId,
+                viewModel = hiltViewModel(),
+                onBack = { navController.popBackStack() },
+                onBookNow = { id ->
+                    // Sau khi chọn bác sĩ, thường sẽ nhảy thẳng vào bước chọn lịch khám
+                    navController.navigate("booking_step_1/$id")
+                }
+            )
+        }
 
         // Các màn hình khác tạm thời để Text để không bị lỗi Build
         composable(Screen.Ticket.route) {
