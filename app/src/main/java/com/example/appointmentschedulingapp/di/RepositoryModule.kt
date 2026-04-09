@@ -57,5 +57,4 @@ abstract class RepositoryModule {
     abstract fun bindDoctorRepository(
         doctorRepositoryImpl: DoctorRepositoryImpl
     ): DoctorRepository
-
 }

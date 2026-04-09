@@ -29,10 +29,10 @@ class DoctorRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getDoctorsByDepartment(departmentId: String): Result<List<Doctor>> = withContext(dispatcher) {
+    override suspend fun getDoctorsByClinic(clinicId: String): Result<List<Doctor>> = withContext(dispatcher) {
         try {
-            val snapshot = doctorRef.orderByChild(Config.FIREBASE_DEPARTMENT_ID)
-                .equalTo(departmentId)
+            val snapshot = doctorRef.orderByChild(Config.FIREBASE_CLINIC_ID)
+                .equalTo(clinicId)
                 .get()
                 .await()
             val doctors = snapshot.children.mapNotNull {

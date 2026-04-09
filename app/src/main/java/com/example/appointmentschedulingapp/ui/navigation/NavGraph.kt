@@ -20,6 +20,7 @@ import com.example.appointmentschedulingapp.ui.features.doctor.DoctorDetailScree
 
 import com.example.appointmentschedulingapp.ui.features.home.HomeScreen
 import com.example.appointmentschedulingapp.ui.features.notifications.NotificationsScreen
+import com.example.appointmentschedulingapp.ui.features.patient.CreatePatientProfileScreen
 import com.example.appointmentschedulingapp.ui.features.profile.ProfileScreen
 import com.example.appointmentschedulingapp.ui.features.tickets.TicketsScreen
 
@@ -119,6 +120,15 @@ fun AppNavGraph(navController: NavHostController,
                     }
                 }
 
+            )
+        }
+
+        composable(Screen.CreatePatientProfile.route) {
+            CreatePatientProfileScreen(
+                onBack = { navController.popBackStack() },
+                onSave = {
+                    navController.popBackStack()
+                }
             )
         }
 

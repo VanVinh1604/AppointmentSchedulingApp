@@ -21,7 +21,7 @@ class DoctorViewModel @Inject constructor(
 
     fun loadDoctors(departmentId: String? = null) {
         viewModelScope.launch {
-            getDoctorsUseCase.execute(departmentId).onSuccess { list ->
+            getDoctorsUseCase.execute().onSuccess { list ->
                 println("DEBUG_DOCTOR: Đã lấy được ${list.size} bác sĩ") // Thêm dòng này
                 _doctors.value = list
             }.onFailure {

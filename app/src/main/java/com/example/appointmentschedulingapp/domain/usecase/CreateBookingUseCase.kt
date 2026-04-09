@@ -20,7 +20,7 @@ class CreateBookingUseCase @Inject constructor(
             patientId = state.selectedPatientId,
             patientName = state.patientName,
             specialty = state.selectedSpecialty,
-            service = state.selectedService,
+            service = state.selectedBookingType,
             appointmentDate = state.selectedDate,
             appointmentTime = state.selectedTime
         )

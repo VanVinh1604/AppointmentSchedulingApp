@@ -25,43 +25,31 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appointmentschedulingapp.ui.features.booking.BookingEvent
 import com.example.appointmentschedulingapp.ui.features.booking.BookingUiState
 import com.example.appointmentschedulingapp.ui.features.booking.BookingViewModel
+import com.example.appointmentschedulingapp.ui.features.booking.components.BookingFlowTopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookingStep1Screen(
     onBack: () -> Unit,
-    onUpdateSpecialty: (String) -> Unit,
-    uiState: BookingUiState,           // Thêm tham số này
+    onEvent: (BookingEvent) -> Unit,
+    uiState: BookingUiState,
     onNext: () -> Unit,
 ) {
+    val viewModel: BookingViewModel = hiltViewModel()
+
     val primaryColor = Color(0xFF1976D2)
     var showSpecialtySheet by remember { mutableStateOf(false) }
     var showServiceSheet by remember { mutableStateOf(false) }
     var showTimeSheet by remember { mutableStateOf(false) }
-
+    var showDatePicker by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
-            Column(
-                modifier = Modifier
-                    .background(primaryColor)
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            ) {
-                // Hàng 1: Nút back và Tiêu đề
-                CenterAlignedTopAppBar(
-                    title = { Text("Chọn thông tin khám", color = Color.White, fontSize = 18.sp) },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(Icons.Default.ArrowBack, null, tint = Color.White)
-                        }
-                    },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = primaryColor)
-                )
-
-                // Hàng 2: Stepper (Tiến trình 4 bước)
-                BookingStepper(currentStep = 1)
-            }
+            BookingFlowTopBar(
+                title = "Chọn thông tin khám",
+                currentStep = 1,
+                onBack = onBack
+            )
         },
         bottomBar = {
             // Nút Tiếp tục cố định ở dưới
@@ -117,7 +105,7 @@ fun BookingStep1Screen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // 2. Danh sách lựa chọn (Chuyên khoa, Dịch vụ, Phòng khám, Ngày, Giờ)
+                // 2. Danh sách lựa chọn (Chuyên khoa, Dịch vụ, Ngày, Giờ)
                 SelectionField(
                     label = "Chuyên khoa",
                     value = uiState.selectedSpecialty.ifEmpty { "Chọn chuyên khoa" },
@@ -127,24 +115,48 @@ fun BookingStep1Screen(
                 }
 
                 SelectionField(
-                    label = "Dịch vụ",
-                    value = uiState.selectedService.ifEmpty { "Chọn dịch vụ" },
-                    icon = Icons.Default.SettingsSuggest
+                    label = "Hình thức khám",
+                    value = uiState.selectedBookingType.ifEmpty { "Chọn hình thức khám" },
+                    icon = Icons.Default.MedicalServices,
+                    onClick = {
+                        showServiceSheet = true
+                    }
+                )
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFF5F9FF)
+                    ),
+                    shape = RoundedCornerShape(10.dp)
                 ) {
-                    showServiceSheet = true
+                    Row(
+                        modifier = Modifier.padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Info,
+                            contentDescription = null,
+                            tint = Color(0xFF1976D2)
+                        )
+
+                        Spacer(modifier = Modifier.width(10.dp))
+
+                        Text(
+                            text = "Số phòng khám sẽ được bệnh viện thông báo khi bạn đến quầy lễ tân.",
+                            fontSize = 13.sp,
+                            color = Color(0xFF333333)
+                        )
+                    }
                 }
 
                 SelectionField(
-                    label = "Phòng khám",
-                    value = "Chọn phòng khám",
-                    icon = Icons.Default.MeetingRoom
-                ) { }
-
-                SelectionField(
                     label = "Ngày khám",
-                    value = "Chọn ngày khám",
+                    value = uiState.selectedDate.ifEmpty { "Chọn ngày khám" },
                     icon = Icons.Default.CalendarMonth
-                ) { }
+                ) {
+                    showDatePicker = true
+                }
 
                 SelectionField(
                     label = "Giờ khám",
@@ -153,20 +165,15 @@ fun BookingStep1Screen(
                 ) {
                     showTimeSheet = true
                 }
+            }
 
-
-                }
             if (showSpecialtySheet) {
-                ModalBottomSheet(
-                    onDismissRequest = {
-                        showSpecialtySheet = false
-                    }
-                ) {
+                ModalBottomSheet(onDismissRequest = { showSpecialtySheet = false }) {
                     uiState.selectedClinic?.specialties?.forEach { specialty ->
                         ListItem(
                             headlineContent = { Text(specialty) },
                             modifier = Modifier.clickable {
-                                onUpdateSpecialty(specialty)
+                                onEvent(BookingEvent.UpdateSpecialty(specialty))
                                 showSpecialtySheet = false
                             }
                         )
@@ -184,72 +191,71 @@ fun BookingStep1Screen(
                         ListItem(
                             headlineContent = { Text(service) },
                             modifier = Modifier.clickable {
-                                // callback event
+                                onEvent(BookingEvent.SelectService(service))
                                 showServiceSheet = false
                             }
                         )
                     }
                 }
-                if (showSpecialtySheet) {
-                    ModalBottomSheet(
-                        onDismissRequest = {
-                            showSpecialtySheet = false
-                        }
-                    ) {
-                        uiState.selectedClinic?.specialties?.forEach { specialty ->
-                            ListItem(
-                                headlineContent = { Text(specialty) },
-                                modifier = Modifier.clickable {
-                                    onUpdateSpecialty(specialty)
-                                    showSpecialtySheet = false
+            }
+
+            if (showDatePicker) {
+                val datePickerState = rememberDatePickerState()
+
+                DatePickerDialog(
+                    onDismissRequest = { showDatePicker = false },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                val selectedMillis = datePickerState.selectedDateMillis
+                                if (selectedMillis != null) {
+                                    val formattedDate = java.text.SimpleDateFormat(
+                                        "dd/MM/yyyy",
+                                        java.util.Locale.getDefault()
+                                    ).format(java.util.Date(selectedMillis))
+
+                                    onEvent(BookingEvent.SelectDate(formattedDate))
                                 }
-                            )
+                                showDatePicker = false
+                            }
+                        ) {
+                            Text("Xác nhận")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { showDatePicker = false }
+                        ) {
+                            Text("Hủy")
                         }
                     }
+                ) {
+                    DatePicker(state = datePickerState)
                 }
-
-                if (showServiceSheet) {
-                    ModalBottomSheet(
-                        onDismissRequest = {
-                            showServiceSheet = false
-                        }
-                    ) {
-                        uiState.selectedClinic?.services?.forEach { service ->
-                            ListItem(
-                                headlineContent = { Text(service) },
-                                modifier = Modifier.clickable {
-                                    // callback event
-                                    showServiceSheet = false
-                                }
-                            )
-                        }
-                    }
-                }
-
-                if (showTimeSheet) {
-                    ModalBottomSheet(
-                        onDismissRequest = { showTimeSheet = false }
-                    ) {
-                        listOf(
-                            "Buổi sáng (07:00 - 11:00)",
-                            "Buổi chiều (13:00 - 17:00)"
-                        ).forEach { time ->
-                            ListItem(
-                                headlineContent = { Text(time) },
-                                modifier = Modifier.clickable {
-                                    // update event
-                                    showTimeSheet = false
-                                }
-                            )
-                        }
+            }
+            if (showTimeSheet) {
+                ModalBottomSheet(
+                    onDismissRequest = { showTimeSheet = false }
+                ) {
+                    listOf(
+                        "Buổi sáng (07:00 - 11:00)",
+                        "Buổi chiều (13:00 - 17:00)"
+                    ).forEach { time ->
+                        ListItem(
+                            headlineContent = { Text(time) },
+                            modifier = Modifier.clickable {
+                                onEvent(BookingEvent.SelectTime(time))
+                                showTimeSheet = false
+                            }
+                        )
                     }
                 }
             }
         }
-
     }
-
 }
+
+
 
 @Composable
 fun BookingStepper(currentStep: Int) {

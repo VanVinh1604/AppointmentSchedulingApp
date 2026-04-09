@@ -1,15 +1,13 @@
 package com.example.appointmentschedulingapp.ui.navigation
 
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
+import androidx.navigation.compose.navigation
 import com.example.appointmentschedulingapp.ui.features.booking.*
 import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingStep1Screen
 import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingStep2Screen
@@ -17,83 +15,71 @@ import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingSte
 fun NavGraphBuilder.bookingNavGraph(
     navController: NavHostController
 ) {
-    composable(Screen.SelectClinic.route) { backStackEntry ->
-
-        val bookingViewModel: BookingViewModel = hiltViewModel(backStackEntry)
-
-        SelectClinicScreen(
-            bookingViewModel = bookingViewModel,
-            onBack = { navController.popBackStack() },
-            onNavigateToDetail = { clinicId ->
-                navController.navigate(Screen.ClinicDetail.createRoute(clinicId))
-            },
-            onNavigateToBookingStep1 = {
-                navController.navigate(Screen.BookingStep1.route)
+    navigation(
+        route = "booking_graph",
+        startDestination = Screen.SelectClinic.route
+    ) {
+        composable(Screen.SelectClinic.route) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry("booking_graph")
             }
-        )
-    }
 
-    composable(
-        route = "clinic_detail/{clinicId}",
-        arguments = listOf(navArgument("clinicId") { type = NavType.StringType })
-    ) { backStackEntry ->
-        val id = backStackEntry.arguments?.getString("clinicId") ?: ""
-        ClinicDetailScreen(
-            clinicId = id,
-            onBack = { navController.popBackStack() }
-        )
-    }
+            val bookingViewModel: BookingViewModel = hiltViewModel(parentEntry)
 
-    composable(Screen.BookingStep1.route) { backStackEntry ->
-
-        val parentEntry = remember(backStackEntry) {
-            navController.getBackStackEntry(Screen.SelectClinic.route)
+            SelectClinicScreen(
+                bookingViewModel = bookingViewModel,
+                onBack = { navController.popBackStack() },
+                onNavigateToDetail = { clinicId ->
+                    navController.navigate(Screen.ClinicDetail.createRoute(clinicId))
+                },
+                onNavigateToBookingStep1 = {
+                    navController.navigate(Screen.BookingStep1.route)
+                }
+            )
         }
 
-        val bookingViewModel: BookingViewModel = hiltViewModel(parentEntry)
-        val uiState by bookingViewModel.uiState.collectAsState()
-
-        LaunchedEffect(Unit) {
-            bookingViewModel.onEvent(BookingEvent.SetStep(1))
-        }
-
-        BookingStep1Screen(
-            uiState = uiState,
-            onBack = { navController.popBackStack() },
-            onNext = {
-                bookingViewModel.onEvent(BookingEvent.SetStep(2))
-                navController.navigate("booking_step2")
-            },
-            onUpdateSpecialty = {
-                bookingViewModel.onEvent(
-                    BookingEvent.UpdateSpecialty(it)
-                )
+        composable(Screen.BookingStep1.route) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry("booking_graph")
             }
-        )
-    }
 
-    composable("booking_step2") { backStackEntry ->
+            val bookingViewModel: BookingViewModel = hiltViewModel(parentEntry)
+            val uiState by bookingViewModel.uiState.collectAsState()
 
-        val parentEntry = remember(backStackEntry) {
-            navController.getBackStackEntry(Screen.SelectClinic.route)
+            BookingStep1Screen(
+                uiState = uiState,
+                onBack = { navController.popBackStack() },
+                onNext = {
+                    navController.navigate("booking_step2")
+                },
+                onEvent = bookingViewModel::onEvent
+            )
         }
 
-        val bookingViewModel: BookingViewModel = hiltViewModel(parentEntry)
-        val uiState by bookingViewModel.uiState.collectAsState()
+        composable("booking_step2") { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry("booking_graph")
+            }
 
-        LaunchedEffect(Unit) {
-            bookingViewModel.onEvent(BookingEvent.SetStep(2))
+            val bookingViewModel: BookingViewModel = hiltViewModel(parentEntry)
+            val uiState by bookingViewModel.uiState.collectAsState()
+
+            BookingStep2Screen(
+                uiState = uiState,
+                patientList = listOf(
+
+                ),
+                onPatientSelected = { id, name ->
+                    bookingViewModel.onEvent(
+                        BookingEvent.SelectPatient(id, name)
+                    )
+                    navController.navigate("booking_step3")
+                },
+                onBack = { navController.popBackStack() },
+                onCreatePatient = {
+                    navController.navigate(Screen.CreatePatientProfile.route)
+                }
+            )
         }
-
-        BookingStep2Screen(
-            uiState = uiState,
-            onPatientSelected = { id, name ->
-                bookingViewModel.onEvent(
-                    BookingEvent.SelectPatient(id, name)
-                )
-            },
-            onBack = { navController.popBackStack() },
-            onNext = {}
-        )
     }
 }

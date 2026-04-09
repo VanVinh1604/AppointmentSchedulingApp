@@ -4,10 +4,13 @@ import com.example.appointmentschedulingapp.domain.model.Doctor
 import com.example.appointmentschedulingapp.domain.repository.DoctorRepository
 import javax.inject.Inject
 
-class GetDoctorsUseCase @Inject constructor(
+class GetDoctorsByClinicUseCase @Inject constructor(
     private val repository: DoctorRepository
 ) {
-    suspend fun execute(): Result<List<Doctor>> {
-        return repository.getAllDoctors()
+    suspend operator fun invoke(
+        clinicId: String
+    ): Result<List<Doctor>> {
+        return repository.getDoctorsByClinic(clinicId)
     }
 }
+

@@ -15,6 +15,7 @@ sealed class Screen(
     object Ticket : Screen("Ticket", "Phiếu Khám", Icons.Default.ConfirmationNumber)
     object Notification : Screen("Notification", "Thông báo", Icons.Default.Notifications)
     object Profile : Screen("Profile", "Hồ sơ", Icons.Default.AccountBox)
+    object CreatePatientProfile : Screen("create_patient_profile", "Tạo hồ sơ bệnh nhân", Icons.Default.PersonAdd)
     object Account : Screen("Account", "Tài khoản", Icons.Default.Person)
 
     // Booking Flow
