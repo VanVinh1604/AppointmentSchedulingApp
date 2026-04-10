@@ -3,6 +3,7 @@ package com.example.appointmentschedulingapp.ui.features.booking
 // BookingUiState.kt
 import com.example.appointmentschedulingapp.domain.model.Clinic
 import com.example.appointmentschedulingapp.domain.model.Doctor
+import com.example.appointmentschedulingapp.domain.model.PatientProfile
 
 data class BookingUiState(
     val bookingId: String = "",
@@ -14,14 +15,17 @@ data class BookingUiState(
     val selectedClinic: Clinic? = null,
     val selectedSpecialty: String = "",
 
+    val selectedPatientId: String = "",
+    val patientName: String = "",
+
+    val patientProfiles: List<PatientProfile> = emptyList(),
+
     val doctors: List<Doctor> = emptyList(),
     val selectedDoctor: Doctor? = null,
 
     val selectedDate: String = "",
     val selectedTime: String = "",
 
-    val selectedPatientId: String = "",
-    val patientName: String = "",
 
     val currentStep: Int = 1
 )

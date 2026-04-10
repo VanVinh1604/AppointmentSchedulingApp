@@ -1,5 +1,6 @@
 package com.example.appointmentschedulingapp.ui.navigation
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -11,6 +12,8 @@ import androidx.navigation.compose.navigation
 import com.example.appointmentschedulingapp.ui.features.booking.*
 import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingStep1Screen
 import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingStep2Screen
+import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingStep3Screen
+import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingStep4Screen
 
 fun NavGraphBuilder.bookingNavGraph(
     navController: NavHostController
@@ -56,7 +59,7 @@ fun NavGraphBuilder.bookingNavGraph(
             )
         }
 
-        composable("booking_step2") { backStackEntry ->
+        composable(Screen.BookingStep2.route) { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry("booking_graph")
             }
@@ -64,20 +67,74 @@ fun NavGraphBuilder.bookingNavGraph(
             val bookingViewModel: BookingViewModel = hiltViewModel(parentEntry)
             val uiState by bookingViewModel.uiState.collectAsState()
 
+            val created =
+                backStackEntry.savedStateHandle
+                    .getStateFlow("patient_profile_created", false)
+                    .collectAsState()
+
+            LaunchedEffect(created.value) {
+                if (created.value) {
+                    bookingViewModel.loadPatientProfiles()
+                    backStackEntry.savedStateHandle["patient_profile_created"] = false
+                }
+            }
+
             BookingStep2Screen(
                 uiState = uiState,
-                patientList = listOf(
-
-                ),
+                onLoadPatients = { bookingViewModel.loadPatientProfiles() },
                 onPatientSelected = { id, name ->
                     bookingViewModel.onEvent(
                         BookingEvent.SelectPatient(id, name)
                     )
-                    navController.navigate("booking_step3")
+                    navController.navigate(Screen.BookingStep3.route)
                 },
                 onBack = { navController.popBackStack() },
                 onCreatePatient = {
                     navController.navigate(Screen.CreatePatientProfile.route)
+                }
+            )
+        }
+
+        composable(Screen.BookingStep3.route) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry("booking_graph")
+            }
+
+            val bookingViewModel: BookingViewModel = hiltViewModel(parentEntry)
+            val uiState by bookingViewModel.uiState.collectAsState()
+
+            BookingStep3Screen(
+                uiState = uiState,
+                onBack = {
+                    navController.popBackStack()
+                },
+                onConfirm = {
+                    navController.navigate(Screen.BookingStep4.route)
+                }
+            )
+        }
+
+        composable(Screen.BookingStep4.route) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry("booking_graph")
+            }
+
+            val bookingViewModel: BookingViewModel = hiltViewModel(parentEntry)
+            val uiState by bookingViewModel.uiState.collectAsState()
+
+            BookingStep4Screen(
+                uiState = uiState,
+                onBack = {
+                    navController.popBackStack()
+                },
+                onPaymentSelected = {
+//                    paymentMethod ->
+//                    bookingViewModel.onEvent(
+//                        BookingEvent.SelectPaymentMethod(paymentMethod)
+//                    )
+                },
+                onConfirmPayment = {
+                    bookingViewModel.onEvent(BookingEvent.ConfirmBooking)
                 }
             )
         }

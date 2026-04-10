@@ -14,14 +14,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -34,12 +33,16 @@ import com.example.appointmentschedulingapp.ui.features.booking.components.Empty
 @Composable
 fun BookingStep2Screen(
     uiState: BookingUiState,
-    patientList: List<String>,
+    onLoadPatients: () -> Unit,
     onPatientSelected: (String, String) -> Unit,
     onCreatePatient: () -> Unit,
     onBack: () -> Unit
 ) {
     val primaryBlue = Color(0xFF1976D2)
+
+    LaunchedEffect(Unit) {
+        onLoadPatients()
+    }
 
     Scaffold(
         topBar = {
@@ -60,8 +63,7 @@ fun BookingStep2Screen(
             }
         }
     ) { padding ->
-
-        if (patientList.isEmpty()) {
+        if (uiState.patientProfiles.isEmpty()) {
             EmptyPatientState(
                 modifier = Modifier.padding(padding),
                 onCreatePatient = onCreatePatient
@@ -82,26 +84,31 @@ fun BookingStep2Screen(
                     )
                 }
 
-                items(patientList) { name ->
+                items(uiState.patientProfiles) { patient ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
                             .clickable {
-                                onPatientSelected("ID_$name", name)
+                                onPatientSelected(patient.id, patient.fullName)
                             },
-                        border = if (uiState.patientName == name)
+                        border = if (uiState.selectedPatientId == patient.id)
                             BorderStroke(2.dp, primaryBlue)
                         else null
                     ) {
                         Row(modifier = Modifier.padding(16.dp)) {
-                            Icon(
-                                Icons.Default.Person,
-                                null,
-                                tint = primaryBlue
-                            )
+                            Icon(Icons.Default.Person, null, tint = primaryBlue)
                             Spacer(Modifier.width(12.dp))
-                            Text(name)
+                            Column {
+                                Text(
+                                    text = patient.fullName,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = patient.phoneNumber,
+                                    fontSize = 12.sp
+                                )
+                            }
                         }
                     }
                 }

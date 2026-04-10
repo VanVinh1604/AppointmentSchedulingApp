@@ -7,6 +7,8 @@ object Config {
     const val FIREBASE_DOCTORS = "doctors"
     const val FIREBASE_DEPARTMENTS = "departments"
 
+    const val FIREBASE_PATIENTS = "patients"
+
     const val FIREBASE_DEPARTMENT_ID = "departmentId"
     const val FIREBASE_BOOKINGS = "bookings"
     const val FIREBASE_PAYMENTS = "payments"

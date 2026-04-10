@@ -33,8 +33,9 @@ sealed class Screen(
 
     object BookingStep1 : Screen("booking_step1", "Chọn thông tin khám", Icons.Default.List)
     object BookingStep2 : Screen("booking_step2", "Chọn dịch vụ", Icons.Default.MedicalServices)
-    object BookingStep3 : Screen("booking_step3", "Chọn thời gian", Icons.Default.Schedule)
+    object BookingStep3 : Screen("booking_step3", "Xác nhận thông tin", Icons.Default.Schedule)
 
+    object BookingStep4 : Screen("booking_step4", "Xác nhận thanh toan", Icons.Default.CheckCircle)
     // Auth
     object Auth : Screen("auth", "Đăng nhập/Đăng ký", Icons.Default.Lock)
     object OtpVerification : Screen(

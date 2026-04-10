@@ -1,6 +1,5 @@
 package com.example.appointmentschedulingapp.ui.features.booking
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,6 +8,7 @@ import kotlinx.coroutines.flow.update
 import com.example.appointmentschedulingapp.domain.usecase.CreateBookingUseCase
 import com.example.appointmentschedulingapp.domain.usecase.GetClinicByIdUseCase
 import com.example.appointmentschedulingapp.domain.usecase.GetDoctorsByClinicUseCase
+import com.example.appointmentschedulingapp.domain.usecase.GetPatientProfilesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -17,7 +17,8 @@ import javax.inject.Inject
 class BookingViewModel @Inject constructor(
     private val getClinicByIdUseCase: GetClinicByIdUseCase,
     private val createBookingUseCase: CreateBookingUseCase,
-    private val getDoctorsByClinicUseCase: GetDoctorsByClinicUseCase
+    private val getDoctorsByClinicUseCase: GetDoctorsByClinicUseCase,
+    private val getPatientProfilesUseCase: GetPatientProfilesUseCase
 ) : ViewModel() {
 
     private companion object {
@@ -123,6 +124,33 @@ class BookingViewModel @Inject constructor(
 //            }
 //        }
 //    }
+
+    fun loadPatientProfiles() {
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(isLoading = true)
+            }
+
+            getPatientProfilesUseCase()
+                .onSuccess { profiles ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            patientProfiles = profiles,
+                            errorMessage = null
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = error.message ?: "Không tải được hồ sơ bệnh nhân"
+                        )
+                    }
+                }
+        }
+    }
 
     private fun confirmBooking() {
         viewModelScope.launch {

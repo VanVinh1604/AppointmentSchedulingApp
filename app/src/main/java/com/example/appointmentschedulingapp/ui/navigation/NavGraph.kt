@@ -125,8 +125,12 @@ fun AppNavGraph(navController: NavHostController,
 
         composable(Screen.CreatePatientProfile.route) {
             CreatePatientProfileScreen(
-                onBack = { navController.popBackStack() },
-                onSave = {
+                onBack = { isCreated ->
+                    if (isCreated) {
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set("patient_profile_created", true)
+                    }
                     navController.popBackStack()
                 }
             )

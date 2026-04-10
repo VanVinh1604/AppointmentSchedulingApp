@@ -5,14 +5,19 @@ import com.example.appointmentschedulingapp.data.repository.BookingRepositoryImp
 import com.example.appointmentschedulingapp.data.repository.ClinicRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.DoctorRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.HomeRepositoryImpl
+import com.example.appointmentschedulingapp.data.repository.PatientProfileRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.UserSessionRepositoryImpl
 import com.example.appointmentschedulingapp.domain.repository.AuthRepository
 import com.example.appointmentschedulingapp.domain.repository.BookingRepository
 import com.example.appointmentschedulingapp.domain.repository.ClinicRepository
 import com.example.appointmentschedulingapp.domain.repository.DoctorRepository
 import com.example.appointmentschedulingapp.domain.repository.HomeRepository
+import com.example.appointmentschedulingapp.domain.repository.PatientRepository
 import com.example.appointmentschedulingapp.domain.repository.UserSessionRepository
 import dagger.Module
+
+
+
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
@@ -57,4 +62,10 @@ abstract class RepositoryModule {
     abstract fun bindDoctorRepository(
         doctorRepositoryImpl: DoctorRepositoryImpl
     ): DoctorRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPatientProfileRepository(
+        impl: PatientProfileRepositoryImpl
+    ): PatientRepository
 }

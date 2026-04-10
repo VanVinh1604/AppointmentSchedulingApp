@@ -1,10 +1,9 @@
-package com.example.appointmentschedulingapp.domain.model
+package com.example.appointmentschedulingapp.ui.features.patient
 
-data class PatientProfile(
-    val id: String = "",
+data class CreatePatientProfileUiState(
     val fullName: String = "",
     val dateOfBirth: String = "",
-    val gender: String = "",
+    val gender: String = "Nam",
     val phoneNumber: String = "",
     val address: String = "",
 
@@ -12,15 +11,15 @@ data class PatientProfile(
     val healthInsuranceNumber: String = "",
     val healthInsuranceExpiry: String = "",
 
-    val relationship: String = "Bản thân", // Bản thân / Con / Cha / Mẹ
+    val relationship: String = "Bản thân",
     val emergencyContact: String = "",
 
     val allergies: String = "",
     val medicalHistory: String = "",
 
-    val qrCodeUrl: String = "",
-    val avatarUrl: String = "",
-
     val isDefault: Boolean = false,
-    val createdAt: Long = System.currentTimeMillis()
+
+    val isLoading: Boolean = false,
+    val isSuccess: Boolean = false,
+    val error: String? = null
 )
