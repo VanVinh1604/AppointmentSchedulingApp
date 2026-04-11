@@ -20,6 +20,10 @@ data class BookingUiState(
 
     val patientProfiles: List<PatientProfile> = emptyList(),
 
+    val selectedPaymentMethod: String = "CASH",
+    val momoPayUrl: String? = null,
+
+
     val doctors: List<Doctor> = emptyList(),
     val selectedDoctor: Doctor? = null,
 

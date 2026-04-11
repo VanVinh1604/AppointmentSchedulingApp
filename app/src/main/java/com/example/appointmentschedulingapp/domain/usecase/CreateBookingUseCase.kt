@@ -22,7 +22,9 @@ class CreateBookingUseCase @Inject constructor(
             specialty = state.selectedSpecialty,
             service = state.selectedBookingType,
             appointmentDate = state.selectedDate,
-            appointmentTime = state.selectedTime
+            appointmentTime = state.selectedTime,
+            paymentMethod = state.selectedPaymentMethod
+
         )
 
         return bookingRepository.createBooking(booking)

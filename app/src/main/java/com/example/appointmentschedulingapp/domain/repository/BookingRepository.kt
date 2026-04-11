@@ -1,6 +1,7 @@
 package com.example.appointmentschedulingapp.domain.repository
 
 import com.example.appointmentschedulingapp.domain.model.Booking
+import com.example.appointmentschedulingapp.ui.features.tickets.BookingStatus
 import kotlinx.coroutines.flow.Flow
 
 interface BookingRepository {
@@ -22,4 +23,6 @@ interface BookingRepository {
 
     /** Observes bookings as a live stream (optional – for real-time updates) */
     fun observeBookings(): Flow<List<Booking>>
+
+    suspend fun updateBookingStatus(bookingId: String, status: BookingStatus): Result<Unit>
 }

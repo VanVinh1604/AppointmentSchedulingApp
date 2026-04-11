@@ -1,4 +1,3 @@
-
 package com.example.appointmentschedulingapp.ui.navigation
 
 import androidx.compose.material.icons.Icons
@@ -35,7 +34,11 @@ sealed class Screen(
     object BookingStep2 : Screen("booking_step2", "Chọn dịch vụ", Icons.Default.MedicalServices)
     object BookingStep3 : Screen("booking_step3", "Xác nhận thông tin", Icons.Default.Schedule)
 
-    object BookingStep4 : Screen("booking_step4", "Xác nhận thanh toan", Icons.Default.CheckCircle)
+    object BookingStep4 : Screen("booking_step4?orderId={orderId}", "Xác nhận thanh toan", Icons.Default.CheckCircle) {
+        fun createRoute(orderId: String? = null): String {
+            return if (orderId != null) "booking_step4?orderId=$orderId" else "booking_step4"
+        }
+    }
 
     object BookingReceipt : Screen("booking_receipt", "Phiếu khám", Icons.Default.Receipt)
     data object TicketDetail : Screen("ticket_detail/{bookingId}", "Chi tiết phiếu khám", Icons.Default.ConfirmationNumber) {

@@ -1,27 +1,31 @@
 package com.example.appointmentschedulingapp.ui.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
+
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.setValue
+
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import androidx.navigation.navDeepLink
 import com.example.appointmentschedulingapp.ui.features.booking.*
 import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingStep1Screen
 import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingStep2Screen
 import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingStep3Screen
 import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingStep4Screen
 import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingReceiptScreen
-import com.example.appointmentschedulingapp.ui.features.tickets.TicketDetailScreen
-import com.example.appointmentschedulingapp.ui.features.tickets.TicketsViewModel
+
 
 fun NavGraphBuilder.bookingNavGraph(
     navController: NavHostController
@@ -122,33 +126,63 @@ fun NavGraphBuilder.bookingNavGraph(
             )
         }
 
-        composable(Screen.BookingStep4.route) { backStackEntry ->
+        // bookingNavGraph.kt
+
+        // bookingNavGraph.kt
+
+        // bookingNavGraph.kt
+
+        composable(
+            route = Screen.BookingStep4.route
+            // ✅ Bỏ hết deepLinks và arguments
+        ) { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry("booking_graph")
             }
-
             val bookingViewModel: BookingViewModel = hiltViewModel(parentEntry)
             val uiState by bookingViewModel.uiState.collectAsState()
 
+            // ✅ Bỏ orderId và hasProcessedResult — không cần nữa
+            // ✅ Bỏ LaunchedEffect(orderId) — MomoCallbackBus trong ViewModel xử lý
+
+            // Khi isSuccess thay đổi, chuyển trang sang Receipt
+            LaunchedEffect(uiState.isSuccess) {
+                if (uiState.isSuccess) {  // ✅ Bỏ điều kiện orderId != null
+                    android.util.Log.d("BookingNavGraph", "Payment verified! Navigating to receipt")
+                    navController.navigate(Screen.BookingReceipt.route) {
+                        popUpTo("booking_graph") { inclusive = false }
+                        launchSingleTop = true
+                    }
+                }
+            }
+
             BookingStep4Screen(
                 uiState = uiState,
-                onBack = {
-                    navController.popBackStack()
-                },
-                onPaymentSelected = {
-//                    paymentMethod ->
-//                    bookingViewModel.onEvent(
-//                        BookingEvent.SelectPaymentMethod(paymentMethod)
-//                    )
-                },
-                onConfirmPayment = {
-                    bookingViewModel.onEvent(BookingEvent.ConfirmBooking)
+                onBack = { navController.popBackStack() },
+                onPaymentSelected = { method -> bookingViewModel.onEvent(BookingEvent.SelectPaymentMethod(method)) },
+                onConfirmPayment = { bookingViewModel.onEvent(BookingEvent.ConfirmBooking) },
+                onOpenPaymentUrl = { url ->
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+                        setPackage("vn.momo.platform.test")
+                    }
+                    try {
+                        navController.context.startActivity(intent)
+                    } catch (e: ActivityNotFoundException) {
+                        Toast.makeText(
+                            navController.context,
+                            "MoMo app chưa được cài đặt",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 },
                 onNavigateToReceipt = {
                     navController.navigate(Screen.BookingReceipt.route) {
                         popUpTo("booking_step1") { inclusive = true }
                         launchSingleTop = true
                     }
+                },
+                onVerifyPayment = { bookingId ->
+                    bookingViewModel.onMomoPaymentReturned(bookingId)
                 }
             )
         }

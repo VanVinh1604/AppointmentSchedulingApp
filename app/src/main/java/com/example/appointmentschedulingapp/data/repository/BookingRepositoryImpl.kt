@@ -132,6 +132,17 @@ class BookingRepositoryImpl @Inject constructor(
         awaitClose { indexRef.removeEventListener(listener) }
     }
 
+    override suspend fun updateBookingStatus(bookingId: String, status: BookingStatus): Result<Unit> =
+        withContext(dispatcher) {
+            runCatching {
+                bookingRef(bookingId)
+                    .child("status")
+                    .setValue(status.name)
+                    .await()
+                Unit
+            }
+        }
+
     private fun DataSnapshot.toBooking(): Booking? = runCatching {
         Booking(
             id = child("id").getValue(String::class.java) ?: key ?: "",

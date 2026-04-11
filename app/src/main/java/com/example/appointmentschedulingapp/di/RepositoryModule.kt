@@ -7,6 +7,9 @@ import com.example.appointmentschedulingapp.data.repository.DoctorRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.HomeRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.PatientProfileRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.UserSessionRepositoryImpl
+import com.example.appointmentschedulingapp.domain.payment.CashPaymentProcessor
+import com.example.appointmentschedulingapp.domain.payment.MomoPaymentProcessor
+import com.example.appointmentschedulingapp.domain.payment.PaymentProcessor
 import com.example.appointmentschedulingapp.domain.repository.AuthRepository
 import com.example.appointmentschedulingapp.domain.repository.BookingRepository
 import com.example.appointmentschedulingapp.domain.repository.ClinicRepository
@@ -22,6 +25,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import dagger.Binds
+import dagger.multibindings.IntoSet
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -68,4 +72,17 @@ abstract class RepositoryModule {
     abstract fun bindPatientProfileRepository(
         impl: PatientProfileRepositoryImpl
     ): PatientRepository
+
+    @Binds
+    @IntoSet
+    abstract fun bindCashPaymentProcessor(
+        processor: CashPaymentProcessor
+    ): PaymentProcessor
+
+    @Binds
+    @IntoSet
+    abstract fun bindMomoPaymentProcessor(
+        processor: MomoPaymentProcessor
+    ): PaymentProcessor
+
 }
