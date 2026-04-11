@@ -10,8 +10,12 @@ object Config {
     const val FIREBASE_PATIENTS = "patients"
 
     const val FIREBASE_DEPARTMENT_ID = "departmentId"
-    const val FIREBASE_BOOKINGS = "bookings"
+    const val FIREBASE_BOOKINGS       = "bookings"
+    const val FIREBASE_USER_BOOKINGS  = "userBookings"
+
     const val FIREBASE_PAYMENTS = "payments"
 
     const val DATABASE_NAME = "appointment_db"
+
+
 }

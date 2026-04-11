@@ -36,6 +36,11 @@ sealed class Screen(
     object BookingStep3 : Screen("booking_step3", "Xác nhận thông tin", Icons.Default.Schedule)
 
     object BookingStep4 : Screen("booking_step4", "Xác nhận thanh toan", Icons.Default.CheckCircle)
+
+    object BookingReceipt : Screen("booking_receipt", "Phiếu khám", Icons.Default.Receipt)
+    data object TicketDetail : Screen("ticket_detail/{bookingId}", "Chi tiết phiếu khám", Icons.Default.ConfirmationNumber) {
+        fun createRoute(bookingId: String) = "ticket_detail/$bookingId"
+    }
     // Auth
     object Auth : Screen("auth", "Đăng nhập/Đăng ký", Icons.Default.Lock)
     object OtpVerification : Screen(

@@ -24,6 +24,7 @@ import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingSte
 fun BookingFlowTopBar(
     title: String,
     currentStep: Int,
+
     onBack: () -> Unit
 ) {
     val primaryColor = Color(0xFF1976D2)

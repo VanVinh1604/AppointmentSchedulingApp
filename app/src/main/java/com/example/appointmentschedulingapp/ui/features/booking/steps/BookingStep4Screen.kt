@@ -47,8 +47,10 @@ fun BookingStep4Screen(
     onBack: () -> Unit,
     onPaymentSelected: (String) -> Unit,
     onConfirmPayment: () -> Unit,
+    onNavigateToReceipt: () -> Unit,
     availableMethods: List<PaymentMethodOption> = DEFAULT_PAYMENT_METHODS
 ) {
+
     var selectedMethod by remember {
         mutableStateOf(
             availableMethods.firstOrNull { it.id == "CASH" } ?: availableMethods.first()
@@ -56,6 +58,11 @@ fun BookingStep4Screen(
     }
     var showAllSheet by remember { mutableStateOf(false) }
 
+    LaunchedEffect(uiState.isSuccess) {
+        if (uiState.isSuccess) {
+            onNavigateToReceipt()
+        }
+    }
     val pinnedMethods = remember(availableMethods) {
         PINNED_METHOD_IDS.mapNotNull { id -> availableMethods.firstOrNull { it.id == id } }
     }

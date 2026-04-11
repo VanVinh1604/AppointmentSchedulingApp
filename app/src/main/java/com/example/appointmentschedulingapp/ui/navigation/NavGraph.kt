@@ -37,6 +37,7 @@ fun AppNavGraph(navController: NavHostController,
     ) {
 
         bookingNavGraph(navController)
+        ticketsNavGraph(navController)
 
         // Màn hình Home đã có file riêng
         composable(Screen.Home.route) {
@@ -68,10 +69,10 @@ fun AppNavGraph(navController: NavHostController,
             )
         }
 
-        // Các màn hình khác tạm thời để Text để không bị lỗi Build
-        composable(Screen.Ticket.route) {
-            TicketsScreen()
-        }
+//        // Các màn hình khác tạm thời để Text để không bị lỗi Build
+//        composable(Screen.Ticket.route) {
+//            TicketsScreen()
+//        }
 
         composable(Screen.Account.route) {
             AccountScreen(

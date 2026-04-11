@@ -1,9 +1,14 @@
 package com.example.appointmentschedulingapp.ui.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -14,6 +19,9 @@ import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingSte
 import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingStep2Screen
 import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingStep3Screen
 import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingStep4Screen
+import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingReceiptScreen
+import com.example.appointmentschedulingapp.ui.features.tickets.TicketDetailScreen
+import com.example.appointmentschedulingapp.ui.features.tickets.TicketsViewModel
 
 fun NavGraphBuilder.bookingNavGraph(
     navController: NavHostController
@@ -135,8 +143,38 @@ fun NavGraphBuilder.bookingNavGraph(
                 },
                 onConfirmPayment = {
                     bookingViewModel.onEvent(BookingEvent.ConfirmBooking)
+                },
+                onNavigateToReceipt = {
+                    navController.navigate(Screen.BookingReceipt.route) {
+                        popUpTo("booking_step1") { inclusive = true }
+                        launchSingleTop = true
+                    }
                 }
             )
         }
+
+        composable(Screen.BookingReceipt.route) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry("booking_graph")
+            }
+
+            val bookingViewModel: BookingViewModel = hiltViewModel(parentEntry)
+            val uiState by bookingViewModel.uiState.collectAsState()
+
+            BookingReceiptScreen(
+                uiState = uiState,
+                bookingId = uiState.bookingId,
+                onBackHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(0)
+                    }
+                },
+                onViewBooking = {
+//                    navController.navigate(Screen.BookingHistory.route)
+                }
+            )
+        }
+
+
     }
 }

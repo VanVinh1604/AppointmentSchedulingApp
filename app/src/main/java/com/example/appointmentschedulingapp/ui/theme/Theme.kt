@@ -9,30 +9,45 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+//    primary = Purple80,
+//    secondary = PurpleGrey80,
+//    tertiary = Pink80
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    primary = PrimaryBlue,
     onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
-)
 
+    primaryContainer = BlueContainer,
+    onPrimaryContainer = PrimaryBlue,
+
+    secondary = SecondaryBlue,
+    onSecondary = Color.White,
+    secondaryContainer = SecondaryContainer,
+    onSecondaryContainer = PrimaryBlue,
+
+    tertiary = TertiaryBlue,
+    onTertiary = Color.White,
+    tertiaryContainer = TertiaryContainer,
+    onTertiaryContainer = PrimaryBlue,
+
+    background = Color.White,
+    surface = Color.White,
+    surfaceVariant = LightBlue,
+
+    onSurface = TextPrimary,
+    onSurfaceVariant = TextSecondary,
+
+    outline = FieldBorder,
+    outlineVariant = DividerColor,
+
+    error = ErrorRed,
+    errorContainer = ErrorBg
+)
 @Composable
 fun AppointmentSchedulingAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
