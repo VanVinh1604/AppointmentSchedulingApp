@@ -3,7 +3,7 @@ package com.example.appointmentschedulingapp.ui.features.booking
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appointmentschedulingapp.domain.model.Clinic
-import com.example.appointmentschedulingapp.domain.usecase.GetClinicByIdUseCase
+import com.example.appointmentschedulingapp.domain.usecase.clinicUsecase.GetClinicByIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

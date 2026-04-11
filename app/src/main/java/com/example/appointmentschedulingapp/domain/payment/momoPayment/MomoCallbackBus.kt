@@ -1,4 +1,4 @@
-package com.example.appointmentschedulingapp.domain.payment
+package com.example.appointmentschedulingapp.domain.payment.momoPayment
 
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow

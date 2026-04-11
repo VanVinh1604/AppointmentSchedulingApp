@@ -68,7 +68,9 @@ class BookingRepositoryImpl @Inject constructor(
                 indexSnapshot.children
                     .mapNotNull { it.key }
                     .mapNotNull { id ->
-                        bookingRef(id).get().await().toBooking()
+                        val snap = bookingRef(id).get().await()
+                        if (!snap.exists()) return@mapNotNull null
+                        snap.toBooking()
                     }
                     .sortedByDescending { it.createdAt }
             }
@@ -113,7 +115,9 @@ class BookingRepositoryImpl @Inject constructor(
                 bookingsRef.get()
                     .addOnSuccessListener { allBookingsSnapshot ->
                         val bookings = bookingIds.mapNotNull { id ->
-                            allBookingsSnapshot.child(id).toBooking()
+                            val snap = allBookingsSnapshot.child(id)
+                            if (!snap.exists()) return@mapNotNull null
+                            snap.toBooking()
                         }.sortedByDescending { it.createdAt }
 
                         trySend(bookings)
@@ -144,9 +148,12 @@ class BookingRepositoryImpl @Inject constructor(
         }
 
     private fun DataSnapshot.toBooking(): Booking? = runCatching {
+
+        val id = key ?: return null
+
         Booking(
-            id = child("id").getValue(String::class.java) ?: key ?: "",
-            clinicId = child("clinicId").getValue(String::class.java) ?: "",
+            id = id,
+            clinicId = child("clinicId").getValue(String::class.java) ?: return null,
             clinicName = child("clinicName").getValue(String::class.java) ?: "",
             clinicAddress = child("clinicAddress").getValue(String::class.java) ?: "",
             departmentId = child("departmentId").getValue(String::class.java) ?: "",

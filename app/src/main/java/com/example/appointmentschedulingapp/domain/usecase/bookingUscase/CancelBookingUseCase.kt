@@ -1,4 +1,4 @@
-package com.example.appointmentschedulingapp.domain.usecase
+package com.example.appointmentschedulingapp.domain.usecase.bookingUscase
 
 import com.example.appointmentschedulingapp.domain.repository.BookingRepository
 import javax.inject.Inject

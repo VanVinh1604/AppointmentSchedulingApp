@@ -1,24 +1,18 @@
 package com.example.appointmentschedulingapp.ui.navigation
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
-import android.net.Uri
+
 import android.widget.Toast
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import androidx.navigation.navDeepLink
 import com.example.appointmentschedulingapp.ui.features.booking.*
 import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingStep1Screen
 import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingStep2Screen
@@ -161,18 +155,13 @@ fun NavGraphBuilder.bookingNavGraph(
                 onBack = { navController.popBackStack() },
                 onPaymentSelected = { method -> bookingViewModel.onEvent(BookingEvent.SelectPaymentMethod(method)) },
                 onConfirmPayment = { bookingViewModel.onEvent(BookingEvent.ConfirmBooking) },
+                // bookingNavGraph.kt
                 onOpenPaymentUrl = { url ->
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
-                        setPackage("vn.momo.platform.test")
-                    }
                     try {
-                        navController.context.startActivity(intent)
-                    } catch (e: ActivityNotFoundException) {
-                        Toast.makeText(
-                            navController.context,
-                            "MoMo app chưa được cài đặt",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        val intent = androidx.browser.customtabs.CustomTabsIntent.Builder().build()
+                        intent.launchUrl(navController.context, android.net.Uri.parse(url))
+                    } catch (e: Exception) {
+                        Toast.makeText(navController.context, "Không thể mở trang thanh toán", Toast.LENGTH_LONG).show()
                     }
                 },
                 onNavigateToReceipt = {

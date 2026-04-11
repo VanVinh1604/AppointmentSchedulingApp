@@ -4,10 +4,10 @@ import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appointmentschedulingapp.core.helper.ErrorHelper
-import com.example.appointmentschedulingapp.domain.usecase.CheckProfileUseCase
-import com.example.appointmentschedulingapp.domain.usecase.CreateUserProfileUseCase
-import com.example.appointmentschedulingapp.domain.usecase.SendOtpUseCase
-import com.example.appointmentschedulingapp.domain.usecase.VerifyOtpUseCase
+import com.example.appointmentschedulingapp.domain.usecase.patientUsecase.CheckProfileUseCase
+import com.example.appointmentschedulingapp.domain.usecase.athuUsecase.CreateUserProfileUseCase
+import com.example.appointmentschedulingapp.domain.usecase.athuUsecase.SendOtpUseCase
+import com.example.appointmentschedulingapp.domain.usecase.athuUsecase.VerifyOtpUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel

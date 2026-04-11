@@ -18,7 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.appointmentschedulingapp.domain.payment.MomoCallbackBus
+import com.example.appointmentschedulingapp.domain.payment.momoPayment.MomoCallbackBus
 import com.example.appointmentschedulingapp.ui.navigation.AppNavGraph
 import com.example.appointmentschedulingapp.ui.navigation.MyBottomBar
 import com.example.appointmentschedulingapp.ui.theme.AppointmentSchedulingAppTheme
@@ -68,10 +68,14 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
+                // MainActivity.kt - thay LaunchedEffect(Unit) bằng cách check action
                 LaunchedEffect(Unit) {
                     intent?.let { currentIntent ->
-                        Log.d(TAG, "Handling intent in LaunchedEffect")
-                        handleDeepLink(currentIntent)
+                        // ✅ Chỉ xử lý nếu là deep link thật, không phải MAIN intent
+                        if (currentIntent.action == Intent.ACTION_VIEW && currentIntent.data != null) {
+                            Log.d(TAG, "Handling deep link intent in LaunchedEffect")
+                            handleDeepLink(currentIntent)
+                        }
                     }
                 }
             }
@@ -96,26 +100,30 @@ class MainActivity : ComponentActivity() {
      */
     private fun handleDeepLink(intent: Intent) {
         val data = intent.data ?: return
+        Log.d(TAG, "Deep link: $data")
 
-        Log.d(TAG, "Full URI: $data")
-
-        // ✅ Bắt đúng scheme + host + path
         if (data.scheme == "appointmentschedulingapp" && data.host == "momo") {
             when (data.path) {
                 "/success" -> {
-                    val orderId = data.getQueryParameter("orderId")
-                    Log.d(TAG, "MoMo SUCCESS callback, orderId: $orderId")
-                    if (orderId != null) {
-                        MomoCallbackBus.emit(orderId)
-                    }
+                    // ✅ Lấy bookingId thật từ extraData (đã encode base64)
+                    val extraData = data.getQueryParameter("extraData")
+                    val bookingId = if (!extraData.isNullOrEmpty()) {
+                        try {
+                            String(android.util.Base64.decode(extraData, android.util.Base64.NO_WRAP))
+                        } catch (e: Exception) {
+                            null
+                        }
+                    } else null
+
+                    Log.d(TAG, "MoMo SUCCESS, bookingId from extraData: $bookingId")
+
+                    val finalBookingId = bookingId ?: "__momo_success__"
+                    MomoCallbackBus.emit(finalBookingId)
                 }
                 "/cancel" -> {
-                    Log.d(TAG, "MoMo CANCEL callback")
-                    // Có thể emit event cancel nếu cần
+                    Log.d(TAG, "MoMo CANCEL")
                 }
             }
-        } else {
-            navController.handleDeepLink(intent)
         }
     }
 }

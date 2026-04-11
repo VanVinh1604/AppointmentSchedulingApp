@@ -8,7 +8,7 @@ import com.example.appointmentschedulingapp.data.repository.HomeRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.PatientProfileRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.UserSessionRepositoryImpl
 import com.example.appointmentschedulingapp.domain.payment.CashPaymentProcessor
-import com.example.appointmentschedulingapp.domain.payment.MomoPaymentProcessor
+import com.example.appointmentschedulingapp.domain.payment.momoPayment.MomoPaymentProcessor
 import com.example.appointmentschedulingapp.domain.payment.PaymentProcessor
 import com.example.appointmentschedulingapp.domain.repository.AuthRepository
 import com.example.appointmentschedulingapp.domain.repository.BookingRepository

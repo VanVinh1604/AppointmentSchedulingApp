@@ -3,7 +3,7 @@ package com.example.appointmentschedulingapp.ui.features.doctor
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appointmentschedulingapp.core.helper.ErrorHelper
-import com.example.appointmentschedulingapp.domain.usecase.GetDoctorByIdUseCase
+import com.example.appointmentschedulingapp.domain.usecase.doctorUscase.GetDoctorByIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

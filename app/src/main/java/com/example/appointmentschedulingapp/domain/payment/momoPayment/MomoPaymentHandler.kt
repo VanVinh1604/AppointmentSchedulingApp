@@ -1,4 +1,4 @@
-package com.example.appointmentschedulingapp.domain.payment
+package com.example.appointmentschedulingapp.domain.payment.momoPayment
 
 import android.util.Log
 import kotlinx.coroutines.*

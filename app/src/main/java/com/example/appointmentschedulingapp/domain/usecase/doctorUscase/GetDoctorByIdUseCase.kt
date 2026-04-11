@@ -1,4 +1,4 @@
-package com.example.appointmentschedulingapp.domain.usecase
+package com.example.appointmentschedulingapp.domain.usecase.doctorUscase
 
 import com.example.appointmentschedulingapp.domain.model.Doctor
 import com.example.appointmentschedulingapp.domain.repository.DoctorRepository

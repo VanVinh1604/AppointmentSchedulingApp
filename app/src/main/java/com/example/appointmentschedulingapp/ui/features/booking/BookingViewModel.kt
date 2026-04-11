@@ -1,20 +1,22 @@
 package com.example.appointmentschedulingapp.ui.features.booking
 
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.appointmentschedulingapp.domain.payment.MomoCallbackBus
+import com.example.appointmentschedulingapp.domain.payment.momoPayment.MomoCallbackBus
 import com.example.appointmentschedulingapp.domain.payment.PaymentResult
 import com.example.appointmentschedulingapp.domain.repository.BookingRepository
-import com.example.appointmentschedulingapp.domain.usecase.ConfirmBookingWithPaymentUseCase
-import com.example.appointmentschedulingapp.domain.usecase.GetBookingByIdUseCase
+import com.example.appointmentschedulingapp.domain.usecase.bookingUscase.ConfirmBookingWithPaymentUseCase
+import com.example.appointmentschedulingapp.domain.usecase.bookingUscase.GetBookingByIdUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import com.example.appointmentschedulingapp.domain.usecase.GetClinicByIdUseCase
-import com.example.appointmentschedulingapp.domain.usecase.GetDoctorsByClinicUseCase
-import com.example.appointmentschedulingapp.domain.usecase.GetPatientProfilesUseCase
-import com.example.appointmentschedulingapp.domain.usecase.GetBookingsUseCase
+import com.example.appointmentschedulingapp.domain.usecase.clinicUsecase.GetClinicByIdUseCase
+import com.example.appointmentschedulingapp.domain.usecase.doctorUscase.GetDoctorsByClinicUseCase
+import com.example.appointmentschedulingapp.domain.usecase.patientUsecase.GetPatientProfilesUseCase
+import com.example.appointmentschedulingapp.domain.usecase.bookingUscase.GetBookingsUseCase
+import com.example.appointmentschedulingapp.ui.features.tickets.BookingStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -22,6 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class BookingViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val getClinicByIdUseCase: GetClinicByIdUseCase,
     private val confirmBookingWithPaymentUseCase: ConfirmBookingWithPaymentUseCase,
     private val getDoctorsByClinicUseCase: GetDoctorsByClinicUseCase,
@@ -38,18 +41,39 @@ class BookingViewModel @Inject constructor(
         const val MAX_POLLING_ATTEMPTS = 15 // 30 giây tối đa
     }
 
+
     init {
+        // ✅ Nếu app bị kill và restore, tự động observe booking đang pending
+        val pendingBookingId = savedStateHandle.get<String>("bookingId")
+        val pendingMomoUrl = savedStateHandle.get<String>("momoPayUrl")
+        if (!pendingBookingId.isNullOrEmpty() && !pendingMomoUrl.isNullOrEmpty()) {
+            observeBookingStatus(pendingBookingId)
+        }
+
         viewModelScope.launch {
             MomoCallbackBus.events.collect { orderId ->
-                // Chỉ xử lý nếu đang chờ MoMo (có momoPayUrl)
                 if (_uiState.value.momoPayUrl != null) {
-                    verifyPaymentStatus(orderId)
+                    val bookingId = if (orderId == "__momo_success__") {
+                        _uiState.value.bookingId
+                    } else {
+                        orderId
+                    }
+                    if (bookingId.isNotEmpty()) {
+                        onMomoPaymentReturned(bookingId)
+                    }
                 }
             }
         }
     }
 
-    private val _uiState = MutableStateFlow(BookingUiState())
+    private val _uiState = MutableStateFlow(
+        BookingUiState(
+            // ✅ Khôi phục bookingId và momoPayUrl từ SavedStateHandle
+            bookingId = savedStateHandle.get<String>("bookingId") ?: "",
+            momoPayUrl = savedStateHandle.get<String>("momoPayUrl")
+        )
+    )
+
     val uiState = _uiState.asStateFlow()
 
     fun onEvent(event: BookingEvent) {
@@ -200,6 +224,7 @@ class BookingViewModel @Inject constructor(
         }
     }
 
+
     private fun confirmBooking() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
@@ -222,6 +247,10 @@ class BookingViewModel @Inject constructor(
     private fun handlePaymentResult(paymentResult: PaymentResult) {
         when (paymentResult) {
             is PaymentResult.Redirect -> {
+                // ✅ Lưu vào SavedStateHandle để survive process death
+                savedStateHandle["bookingId"] = paymentResult.bookingId
+                savedStateHandle["momoPayUrl"] = paymentResult.url
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -229,7 +258,6 @@ class BookingViewModel @Inject constructor(
                         momoPayUrl = paymentResult.url
                     )
                 }
-                // ✅ Bắt đầu lắng nghe Firebase realtime ngay lập tức
                 observeBookingStatus(paymentResult.bookingId)
             }
 
@@ -320,18 +348,18 @@ class BookingViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            Log.d(TAG, "onMomoPaymentReturned: updating status for bookingId=$bookingId")
-
             bookingRepository.updateBookingStatus(
                 bookingId = bookingId,
-                status = com.example.appointmentschedulingapp.ui.features.tickets.BookingStatus.CONFIRMED
+                status = BookingStatus.CONFIRMED
             ).onSuccess {
-                Log.d(TAG, "Booking status updated to CONFIRMED")
+                // ✅ Clear saved state sau khi thành công
+                savedStateHandle.remove<String>("bookingId")
+                savedStateHandle.remove<String>("momoPayUrl")
+
                 _uiState.update {
                     it.copy(isLoading = false, isSuccess = true, bookingId = bookingId)
                 }
             }.onFailure { error ->
-                Log.e(TAG, "Failed to update booking status: ${error.message}")
                 _uiState.update {
                     it.copy(isLoading = false, errorMessage = "Lỗi xác nhận thanh toán: ${error.message}")
                 }

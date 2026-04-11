@@ -1,4 +1,4 @@
-package com.example.appointmentschedulingapp.domain.usecase
+package com.example.appointmentschedulingapp.domain.usecase.athuUsecase
 
 import android.app.Activity
 import com.example.appointmentschedulingapp.domain.repository.AuthRepository

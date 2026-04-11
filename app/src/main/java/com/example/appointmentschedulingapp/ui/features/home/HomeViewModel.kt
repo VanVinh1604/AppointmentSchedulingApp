@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appointmentschedulingapp.domain.model.Clinic
 import com.example.appointmentschedulingapp.domain.model.HomeAction
-import com.example.appointmentschedulingapp.domain.usecase.GetClinicsUseCase
+import com.example.appointmentschedulingapp.domain.usecase.clinicUsecase.GetClinicsUseCase
 import com.example.appointmentschedulingapp.domain.usecase.GetHomeActionsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
