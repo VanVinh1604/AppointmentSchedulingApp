@@ -1,6 +1,5 @@
 package com.example.appointmentschedulingapp.ui.features.booking
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,7 +19,6 @@ import com.example.appointmentschedulingapp.domain.usecase.bookingUscase.GetBook
 import com.example.appointmentschedulingapp.ui.features.booking.steps.components.DEFAULT_PAYMENT_METHODS
 import com.example.appointmentschedulingapp.ui.features.tickets.BookingStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

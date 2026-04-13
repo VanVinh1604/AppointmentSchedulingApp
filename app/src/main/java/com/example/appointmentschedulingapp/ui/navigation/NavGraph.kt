@@ -155,7 +155,11 @@ fun AppNavGraph(navController: NavHostController,
         }
 
         composable(Screen.Profile.route) {
-            ProfileScreen()
+            ProfileScreen(
+                onNavigateToCreateProfile = {
+                    navController.navigate(Screen.CreatePatientProfile.route)
+                }
+            )
         }
     }
 }
