@@ -51,9 +51,22 @@ fun CreatePatientProfileContent(
             onPhoneChange = {
                 onEvent(CreatePatientProfileEvent.PhoneChanged(it))
             },
-            address = uiState.address,
-            onAddressChange = {
-                onEvent(CreatePatientProfileEvent.AddressChanged(it))
+
+            provinces = uiState.provinces,
+            selectedProvince = uiState.selectedProvince,
+            onProvinceSelected = {
+                onEvent(CreatePatientProfileEvent.ProvinceSelected(it))
+            },
+
+            wards = uiState.wards,
+            selectedWard = uiState.selectedWard,
+            onWardSelected = {
+                onEvent(CreatePatientProfileEvent.WardSelected(it))
+            },
+
+            addressDetail = uiState.addressDetail,
+            onAddressDetailChange = {
+                onEvent(CreatePatientProfileEvent.AddressDetailChanged(it))
             }
         )
 

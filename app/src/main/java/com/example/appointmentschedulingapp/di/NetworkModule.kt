@@ -11,6 +11,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import androidx.datastore.preferences.core.Preferences
+import com.example.appointmentschedulingapp.data.remote.location.ProvinceApiService
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 // di/NetworkModule.kt
@@ -37,4 +40,21 @@ object NetworkModule {
     fun provideDataStore(
         @ApplicationContext context: Context
     ): DataStore<Preferences> = context.dataStore
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("https://provinces.open-api.vn/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideProvinceApiService(
+        retrofit: Retrofit
+    ): ProvinceApiService {
+        return retrofit.create(ProvinceApiService::class.java)
+    }
 }

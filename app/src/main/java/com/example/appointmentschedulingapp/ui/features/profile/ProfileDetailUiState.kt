@@ -16,7 +16,13 @@ data class ProfileDetailUiState(
     val dateOfBirth: String = "",
     val gender: String = "",
     val phoneNumber: String = "",
-    val address: String = "",
+    val provinceCode: Int = 0,
+    val provinceName: String = "",
+
+    val wardCode: Int = 0,
+    val wardName: String = "",
+
+    val addressDetail: String = "",
     val identityCard: String = "",
     val healthInsuranceNumber: String = "",
     val healthInsuranceExpiry: String = "",
@@ -25,4 +31,11 @@ data class ProfileDetailUiState(
     val allergies: String = "",
     val medicalHistory: String = "",
     val isDefault: Boolean = false
-)
+) {
+    val fullAddress: String
+        get() = listOf(
+            addressDetail,
+            wardName,
+            provinceName
+        ).filter { it.isNotBlank() }.joinToString(", ")
+}

@@ -188,7 +188,12 @@ private fun ProfileDetailContent(
             ProfileField("Số điện thoại", uiState.phoneNumber, uiState.isEditMode, primaryColor) {
                 onFieldChanged(ProfileDetailField.PHONE, it)
             }
-            ProfileField("Địa chỉ", uiState.address, uiState.isEditMode, primaryColor) {
+            ProfileField(
+                "Địa chỉ",
+                if (uiState.isEditMode) uiState.addressDetail else uiState.fullAddress,
+                uiState.isEditMode,
+                primaryColor
+            ) {
                 onFieldChanged(ProfileDetailField.ADDRESS, it)
             }
         }

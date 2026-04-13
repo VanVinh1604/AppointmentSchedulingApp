@@ -1,5 +1,6 @@
 package com.example.appointmentschedulingapp.di
 
+import com.example.appointmentschedulingapp.data.remote.location.LocationRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.AuthRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.BookingRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.ClinicRepositoryImpl
@@ -15,6 +16,7 @@ import com.example.appointmentschedulingapp.domain.repository.BookingRepository
 import com.example.appointmentschedulingapp.domain.repository.ClinicRepository
 import com.example.appointmentschedulingapp.domain.repository.DoctorRepository
 import com.example.appointmentschedulingapp.domain.repository.HomeRepository
+import com.example.appointmentschedulingapp.domain.repository.LocationRepository
 import com.example.appointmentschedulingapp.domain.repository.PatientRepository
 import com.example.appointmentschedulingapp.domain.repository.UserSessionRepository
 import dagger.Module
@@ -85,4 +87,9 @@ abstract class RepositoryModule {
         processor: MomoPaymentProcessor
     ): PaymentProcessor
 
+    @Binds
+    @Singleton
+    abstract fun bindLocationRepository(
+        impl: LocationRepositoryImpl
+    ): LocationRepository
 }

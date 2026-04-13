@@ -1,12 +1,16 @@
 package com.example.appointmentschedulingapp.ui.features.patient
 
+import com.example.appointmentschedulingapp.domain.model.location.Province
+import com.example.appointmentschedulingapp.domain.model.location.Ward
+
 sealed interface CreatePatientProfileEvent {
     data class FullNameChanged(val value: String) : CreatePatientProfileEvent
     data class DateOfBirthChanged(val value: String) : CreatePatientProfileEvent
     data class GenderChanged(val value: String) : CreatePatientProfileEvent
     data class PhoneChanged(val value: String) : CreatePatientProfileEvent
-    data class AddressChanged(val value: String) : CreatePatientProfileEvent
-
+    data class AddressDetailChanged(val value: String) : CreatePatientProfileEvent
+    data class ProvinceSelected(val province: Province): CreatePatientProfileEvent
+    data class WardSelected(val ward: Ward): CreatePatientProfileEvent
     data class IdentityCardChanged(val value: String) : CreatePatientProfileEvent
     data class InsuranceChanged(val value: String) : CreatePatientProfileEvent
     data class InsuranceExpiryChanged(val value: String) : CreatePatientProfileEvent

@@ -29,6 +29,7 @@ class ProfileDetailViewModel @Inject constructor(
 
     init { loadProfile() }
 
+
     fun loadProfile() = viewModelScope.launch {
         _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
@@ -37,12 +38,18 @@ class ProfileDetailViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     profile = profile,
-                    // Điền sẵn edit fields từ profile
+
                     fullName = profile.fullName,
                     dateOfBirth = profile.dateOfBirth,
                     gender = profile.gender,
                     phoneNumber = profile.phoneNumber,
-                    address = profile.address,
+
+                    provinceCode = profile.provinceCode,
+                    provinceName = profile.provinceName,
+                    wardCode = profile.wardCode,
+                    wardName = profile.wardName,
+                    addressDetail = profile.addressDetail,
+
                     identityCard = profile.identityCard,
                     healthInsuranceNumber = profile.healthInsuranceNumber,
                     healthInsuranceExpiry = profile.healthInsuranceExpiry,
@@ -73,7 +80,7 @@ class ProfileDetailViewModel @Inject constructor(
             ProfileDetailField.DATE_OF_BIRTH -> _uiState.value.copy(dateOfBirth = value)
             ProfileDetailField.GENDER -> _uiState.value.copy(gender = value)
             ProfileDetailField.PHONE -> _uiState.value.copy(phoneNumber = value)
-            ProfileDetailField.ADDRESS -> _uiState.value.copy(address = value)
+            ProfileDetailField.ADDRESS -> _uiState.value.copy(addressDetail = value)
             ProfileDetailField.IDENTITY_CARD -> _uiState.value.copy(identityCard = value)
             ProfileDetailField.INSURANCE_NUMBER -> _uiState.value.copy(healthInsuranceNumber = value)
             ProfileDetailField.INSURANCE_EXPIRY -> _uiState.value.copy(healthInsuranceExpiry = value)
@@ -95,7 +102,13 @@ class ProfileDetailViewModel @Inject constructor(
             dateOfBirth = state.dateOfBirth,
             gender = state.gender,
             phoneNumber = state.phoneNumber,
-            address = state.address,
+
+            provinceCode = state.provinceCode,
+            provinceName = state.provinceName,
+            wardCode = state.wardCode,
+            wardName = state.wardName,
+            addressDetail = state.addressDetail,
+
             identityCard = state.identityCard,
             healthInsuranceNumber = state.healthInsuranceNumber,
             healthInsuranceExpiry = state.healthInsuranceExpiry,
@@ -123,13 +136,16 @@ class ProfileDetailViewModel @Inject constructor(
     }
 
     fun deleteProfile() = viewModelScope.launch {
-        _uiState.value = _uiState.value.copy(isDeleting = true, error = null)
+        _uiState.value = _uiState.value.copy(
+            isDeleting = true,
+            error = null
+        )
 
         deletePatientProfileUseCase(profileId)
             .onSuccess {
                 _uiState.value = _uiState.value.copy(
                     isDeleting = false,
-                    isSuccess = true // navigation sẽ lắng nghe cái này để pop back
+                    isSuccess = true
                 )
             }
             .onFailure { e ->
@@ -139,5 +155,7 @@ class ProfileDetailViewModel @Inject constructor(
                 )
             }
     }
+
+
 }
 

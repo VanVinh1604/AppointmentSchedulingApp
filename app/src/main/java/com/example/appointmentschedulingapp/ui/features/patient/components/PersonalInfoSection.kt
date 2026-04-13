@@ -8,17 +8,28 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
+import com.example.appointmentschedulingapp.domain.model.location.Province
+import com.example.appointmentschedulingapp.domain.model.location.Ward
 import com.example.appointmentschedulingapp.ui.features.patient.PatientUiColors
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PersonalInfoSection(
     fullName: String,
@@ -29,9 +40,21 @@ fun PersonalInfoSection(
     onGenderChange: (String) -> Unit,
     phoneNumber: String,
     onPhoneChange: (String) -> Unit,
-    address: String,
-    onAddressChange: (String) -> Unit
+
+    provinces: List<Province>,
+    selectedProvince: Province?,
+    onProvinceSelected: (Province) -> Unit,
+
+    wards: List<Ward>,
+    selectedWard: Ward?,
+    onWardSelected: (Ward) -> Unit,
+
+    addressDetail: String,
+    onAddressDetailChange: (String) -> Unit
 ) {
+    var provinceExpanded by remember { mutableStateOf(false) }
+    var wardExpanded by remember { mutableStateOf(false) }
+
     SectionCard(title = "Thông tin cá nhân") {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -48,7 +71,6 @@ fun PersonalInfoSection(
                         PatientUiColors.BlueBorder,
                         CircleShape
                     )
-                    .clickable { }
             ) {
                 Icon(
                     Icons.Default.Person,
@@ -95,10 +117,76 @@ fun PersonalInfoSection(
 
         Spacer(Modifier.height(10.dp))
 
+        // ===== TỈNH =====
+        ExposedDropdownMenuBox(
+            expanded = provinceExpanded,
+            onExpandedChange = { provinceExpanded = !provinceExpanded }
+        ) {
+            OutlinedTextField(
+                value = selectedProvince?.name ?: "",
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Tỉnh / Thành phố *") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor()
+            )
+
+            ExposedDropdownMenu(
+                expanded = provinceExpanded,
+                onDismissRequest = { provinceExpanded = false }
+            ) {
+                provinces.forEach { province ->
+                    DropdownMenuItem(
+                        text = { Text(province.name) },
+                        onClick = {
+                            onProvinceSelected(province)
+                            provinceExpanded = false
+                        }
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(10.dp))
+
+        // ===== PHƯỜNG =====
+        ExposedDropdownMenuBox(
+            expanded = wardExpanded,
+            onExpandedChange = { wardExpanded = !wardExpanded }
+        ) {
+            OutlinedTextField(
+                value = selectedWard?.name ?: "",
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Phường / Xã *") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor()
+            )
+
+            ExposedDropdownMenu(
+                expanded = wardExpanded,
+                onDismissRequest = { wardExpanded = false }
+            ) {
+                wards.forEach { ward ->
+                    DropdownMenuItem(
+                        text = { Text(ward.name) },
+                        onClick = {
+                            onWardSelected(ward)
+                            wardExpanded = false
+                        }
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(10.dp))
+
         ProfileTextField(
-            label = "Địa chỉ",
-            value = address,
-            onChange = onAddressChange
+            label = "Số nhà, tên đường *",
+            value = addressDetail,
+            onChange = onAddressDetailChange
         )
     }
 }

@@ -3,6 +3,8 @@ package com.example.appointmentschedulingapp.ui.features.patient
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appointmentschedulingapp.domain.model.PatientProfile
+import com.example.appointmentschedulingapp.domain.model.location.Province
+import com.example.appointmentschedulingapp.domain.usecase.location.LocationUseCases
 import com.example.appointmentschedulingapp.domain.usecase.patientUsecase.CreatePatientProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,12 +14,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CreatePatientProfileViewModel @Inject constructor(
-    private val createPatientProfileUseCase: CreatePatientProfileUseCase
+    private val createPatientProfileUseCase: CreatePatientProfileUseCase,
+    private val locationUseCases: LocationUseCases
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CreatePatientProfileUiState())
     val uiState = _uiState.asStateFlow()
 
+
+    init {
+        loadProvinces()
+    }
     fun onEvent(event: CreatePatientProfileEvent) {
         when (event) {
             is CreatePatientProfileEvent.FullNameChanged ->
@@ -32,8 +39,14 @@ class CreatePatientProfileViewModel @Inject constructor(
             is CreatePatientProfileEvent.PhoneChanged ->
                 updateState { copy(phoneNumber = event.value) }
 
-            is CreatePatientProfileEvent.AddressChanged ->
-                updateState { copy(address = event.value) }
+            is CreatePatientProfileEvent.AddressDetailChanged ->
+                updateState { copy(addressDetail = event.value) }
+
+            is CreatePatientProfileEvent.ProvinceSelected ->
+                onProvinceSelected(event.province)
+
+            is CreatePatientProfileEvent.WardSelected ->
+                updateState { copy(selectedWard = event.ward) }
 
             is CreatePatientProfileEvent.IdentityCardChanged ->
                 updateState { copy(identityCard = event.value) }
@@ -76,18 +89,29 @@ class CreatePatientProfileViewModel @Inject constructor(
         updateState { copy(isLoading = true, error = null) }
 
         val profile = PatientProfile(
-            fullName = state.fullName,
-            dateOfBirth = state.dateOfBirth,
-            gender = state.gender,
-            phoneNumber = state.phoneNumber,
-            address = state.address,
-            identityCard = state.identityCard,
-            healthInsuranceNumber = state.healthInsuranceNumber,
-            healthInsuranceExpiry = state.healthInsuranceExpiry,
-            relationship = state.relationship,
-            emergencyContact = state.emergencyContact,
-            allergies = state.allergies,
-            medicalHistory = state.medicalHistory,
+            fullName = state.fullName.trim(),
+            dateOfBirth = state.dateOfBirth.trim(),
+            gender = state.gender.trim(),
+            phoneNumber = state.phoneNumber.trim(),
+
+            provinceCode = state.selectedProvince?.code ?: 0,
+            provinceName = state.selectedProvince?.name ?: "",
+
+            wardCode = state.selectedWard?.code ?: 0,
+            wardName = state.selectedWard?.name ?: "",
+
+            addressDetail = state.addressDetail.trim(),
+
+            identityCard = state.identityCard.trim(),
+            healthInsuranceNumber = state.healthInsuranceNumber.trim(),
+            healthInsuranceExpiry = state.healthInsuranceExpiry.trim(),
+
+            relationship = state.relationship.trim(),
+            emergencyContact = state.emergencyContact.trim(),
+
+            allergies = state.allergies.trim(),
+            medicalHistory = state.medicalHistory.trim(),
+
             isDefault = state.isDefault
         )
 
@@ -115,6 +139,52 @@ class CreatePatientProfileViewModel @Inject constructor(
         return state.fullName.isNotBlank() &&
                 state.dateOfBirth.isNotBlank() &&
                 state.gender.isNotBlank() &&
-                state.phoneNumber.isNotBlank()
+                state.phoneNumber.length >= 10 &&
+                state.selectedProvince != null &&
+                state.selectedWard != null &&
+                state.addressDetail.isNotBlank()
+    }
+    private fun loadProvinces() = viewModelScope.launch {
+        updateState { copy(isLoadingLocation = true) }
+
+        locationUseCases.getProvinces()
+            .onSuccess { provinces ->
+                updateState {
+                    copy(
+                        provinces = provinces,
+                        isLoadingLocation = false
+                    )
+                }
+            }
+            .onFailure {
+                updateState {
+                    copy(
+                        isLoadingLocation = false,
+                        error = "Không tải được tỉnh thành"
+                    )
+                }
+            }
+    }
+
+    private fun onProvinceSelected(province: Province) {
+        updateState {
+            copy(
+                selectedProvince = province,
+                selectedWard = null,
+                wards = emptyList()
+            )
+        }
+
+        viewModelScope.launch {
+            locationUseCases.getWards(province.code)
+                .onSuccess { wards ->
+                    updateState { copy(wards = wards) }
+                }
+                .onFailure {
+                    updateState {
+                        copy(error = "Không tải được danh sách phường/xã")
+                    }
+                }
+        }
     }
 }
