@@ -8,20 +8,26 @@ import com.example.appointmentschedulingapp.common.Config
 import com.example.appointmentschedulingapp.data.local.dao.BookingDao
 import com.example.appointmentschedulingapp.data.local.dao.ClinicDao
 import com.example.appointmentschedulingapp.data.local.dao.DoctorDao
+import com.example.appointmentschedulingapp.data.local.dao.LocationDao
 import com.example.appointmentschedulingapp.data.local.dao.PatientProfileDao
 import com.example.appointmentschedulingapp.data.local.entity.BookingEntity
 import com.example.appointmentschedulingapp.data.local.entity.ClinicEntity
 import com.example.appointmentschedulingapp.data.local.entity.DoctorEntity
 import com.example.appointmentschedulingapp.data.local.entity.PatientProfileEntity
+import com.example.appointmentschedulingapp.data.local.entity.location.ProvinceEntity
+import com.example.appointmentschedulingapp.data.local.entity.location.WardEntity
 
 @Database(
     entities = [
         ClinicEntity::class,
         DoctorEntity::class,
         PatientProfileEntity::class,
-        BookingEntity::class
+        BookingEntity::class,
+        ProvinceEntity::class,
+        WardEntity::class
+
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -31,6 +37,8 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun patientProfileDao(): PatientProfileDao
     abstract fun bookingDao(): BookingDao
+
+    abstract fun locationDao(): LocationDao
 
     companion object {
         @Volatile

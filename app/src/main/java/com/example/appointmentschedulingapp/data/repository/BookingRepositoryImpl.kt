@@ -44,22 +44,28 @@ class BookingRepositoryImpl @Inject constructor(
         withContext(dispatcher) {
             runCatching {
                 val uid = requireUid()
+                println("DEBUG uid = $uid")
+
                 val ref = firebaseDatabase.getReference(Config.FIREBASE_BOOKINGS).push()
-                val bookingId = ref.key ?: error("Firebase push() returned null key")
+                val bookingId = ref.key ?: error("push key null")
+
                 val bookingWithId = booking.copy(id = bookingId)
 
                 val updates = hashMapOf<String, Any>(
                     "${Config.FIREBASE_BOOKINGS}/$bookingId" to bookingWithId,
                     "${Config.FIREBASE_USER_BOOKINGS}/$uid/$bookingId" to true
                 )
+
+                println("DEBUG updates = $updates")
+
                 firebaseDatabase.reference.updateChildren(updates).await()
 
-                // Cache xuống Room
                 bookingDao.insertBooking(bookingWithId.toEntity(uid))
                 bookingId
+            }.onFailure {
+                it.printStackTrace()
             }
         }
-
     // --- GET: Room trước, Firebase fallback ---
     override suspend fun getBookings(): Result<List<Booking>> =
         withContext(dispatcher) {

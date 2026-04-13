@@ -32,4 +32,7 @@ object DatabaseModule {
 
     @Provides
     fun provideBookingDao(db: AppDatabase) = db.bookingDao()
+
+    @Provides
+    fun provideLocationDao(db: AppDatabase) = db.locationDao()
 }
