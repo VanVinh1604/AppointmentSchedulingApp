@@ -44,6 +44,7 @@ data class PaymentMethodOption(
     val icon: ImageVector,
     val iconTint: Color,
     val iconBg: Color,
+    val isImplemented: Boolean = false,
     val group: String = "Khác"         // dùng để group theo danh mục
 )
 
@@ -58,7 +59,8 @@ val DEFAULT_PAYMENT_METHODS: List<PaymentMethodOption> = listOf(
         icon        = Icons.Default.AccountBalanceWallet,
         iconTint    = Color(0xFFAE2070),
         iconBg      = Color(0xFFFCE4EC),
-        group       = "Ví điện tử"
+        group       = "Ví điện tử",
+        isImplemented = true
     ),
     PaymentMethodOption(
         id          = "ZALOPAY",
@@ -67,7 +69,8 @@ val DEFAULT_PAYMENT_METHODS: List<PaymentMethodOption> = listOf(
         icon        = Icons.Default.AccountBalanceWallet,
         iconTint    = Color(0xFF0068FF),
         iconBg      = Color(0xFFE8F0FF),
-        group       = "Ví điện tử"
+        group       = "Ví điện tử",
+        isImplemented = false
     ),
     PaymentMethodOption(
         id          = "VNPAY_WALLET",
@@ -76,7 +79,8 @@ val DEFAULT_PAYMENT_METHODS: List<PaymentMethodOption> = listOf(
         icon        = Icons.Default.AccountBalanceWallet,
         iconTint    = Color(0xFF003087),
         iconBg      = Color(0xFFE8EAF6),
-        group       = "Ví điện tử"
+        group       = "Ví điện tử",
+        isImplemented = false
     ),
     PaymentMethodOption(
         id          = "SHOPEEPAY",
@@ -85,7 +89,8 @@ val DEFAULT_PAYMENT_METHODS: List<PaymentMethodOption> = listOf(
         icon        = Icons.Default.AccountBalanceWallet,
         iconTint    = Color(0xFFEE4D2D),
         iconBg      = Color(0xFFFFF0ED),
-        group       = "Ví điện tử"
+        group       = "Ví điện tử",
+        isImplemented = false
     ),
 
     // ── Thẻ / Ngân hàng ───────────────────────────────────────────────────────
@@ -96,7 +101,9 @@ val DEFAULT_PAYMENT_METHODS: List<PaymentMethodOption> = listOf(
         icon        = Icons.Default.CreditCard,
         iconTint    = Color(0xFF003087),
         iconBg      = Color(0xFFE8EAF6),
-        group       = "Thẻ & Ngân hàng"
+        group       = "Thẻ & Ngân hàng",
+        isImplemented = false
+
     ),
     PaymentMethodOption(
         id          = "VISA_MASTER",
@@ -105,7 +112,8 @@ val DEFAULT_PAYMENT_METHODS: List<PaymentMethodOption> = listOf(
         icon        = Icons.Default.CreditCard,
         iconTint    = Color(0xFF1A237E),
         iconBg      = Color(0xFFE8EAF6),
-        group       = "Thẻ & Ngân hàng"
+        group       = "Thẻ & Ngân hàng",
+        isImplemented = false
     ),
     PaymentMethodOption(
         id          = "BANK_TRANSFER",
@@ -114,7 +122,8 @@ val DEFAULT_PAYMENT_METHODS: List<PaymentMethodOption> = listOf(
         icon        = Icons.Default.AccountBalance,
         iconTint    = Color(0xFF1B5E20),
         iconBg      = Color(0xFFE8F5E9),
-        group       = "Thẻ & Ngân hàng"
+        group       = "Thẻ & Ngân hàng",
+        isImplemented = false
     ),
 
     // ── Bảo hiểm ──────────────────────────────────────────────────────────────
@@ -125,7 +134,8 @@ val DEFAULT_PAYMENT_METHODS: List<PaymentMethodOption> = listOf(
         icon        = Icons.Default.VerifiedUser,
         iconTint    = Color(0xFF00695C),
         iconBg      = Color(0xFFE0F2F1),
-        group       = "Bảo hiểm"
+        group       = "Bảo hiểm",
+        isImplemented = false
     ),
     PaymentMethodOption(
         id          = "INSURANCE_PRIVATE",
@@ -134,7 +144,8 @@ val DEFAULT_PAYMENT_METHODS: List<PaymentMethodOption> = listOf(
         icon        = Icons.Default.Shield,
         iconTint    = Color(0xFF1565C0),
         iconBg      = Color(0xFFE3F2FD),
-        group       = "Bảo hiểm"
+        group       = "Bảo hiểm",
+        isImplemented = false
     ),
 
     // ── Tiền mặt ──────────────────────────────────────────────────────────────
@@ -145,7 +156,9 @@ val DEFAULT_PAYMENT_METHODS: List<PaymentMethodOption> = listOf(
         icon        = Icons.Default.Payments,
         iconTint    = Color(0xFF1B5E20),
         iconBg      = Color(0xFFE8F5E9),
-        group       = "Tiền mặt"
+        group       = "Tiền mặt",
+        isImplemented = true
+
     )
 )
 

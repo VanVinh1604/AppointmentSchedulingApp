@@ -21,7 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appointmentschedulingapp.ui.features.booking.BookingEvent
 import com.example.appointmentschedulingapp.ui.features.booking.BookingUiState
 import com.example.appointmentschedulingapp.ui.features.booking.BookingViewModel
@@ -43,6 +42,12 @@ fun BookingStep1Screen(
     var showTimeSheet by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
 
+
+    val isFormValid =
+        uiState.selectedSpecialty.isNotBlank() &&
+                uiState.selectedBookingType.isNotBlank() &&
+                uiState.selectedDate.isNotBlank() &&
+                uiState.selectedTime.isNotBlank()
     Scaffold(
         topBar = {
             BookingFlowTopBar(
@@ -52,20 +57,28 @@ fun BookingStep1Screen(
             )
         },
         bottomBar = {
-            // Nút Tiếp tục cố định ở dưới
             Surface(shadowElevation = 8.dp) {
                 Button(
                     onClick = onNext,
+                    enabled = isFormValid,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
                         .height(50.dp),
                     shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = primaryColor,
+                        disabledContainerColor = Color.LightGray
+                    )
                 ) {
-                    Text("TIẾP TỤC", fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                    Text(
+                        "TIẾP TỤC",
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
                 }
             }
+
         }
     ) { padding ->
         // BookingStep1Screen.kt
@@ -165,6 +178,14 @@ fun BookingStep1Screen(
                 ) {
                     showTimeSheet = true
                 }
+            }
+            uiState.step1Error?.let {
+                Text(
+                    text = it,
+                    color = Color.Red,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
             }
 
             if (showSpecialtySheet) {

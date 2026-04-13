@@ -415,6 +415,7 @@ private fun BottomPayBar(
     amount: Long,
     onConfirm: () -> Unit
 ) {
+    val isSupported = method.isImplemented
     Surface(shadowElevation = 8.dp) {
         Column(
             modifier = Modifier
@@ -448,6 +449,7 @@ private fun BottomPayBar(
 
             Button(
                 onClick = onConfirm,
+                enabled = isSupported,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
@@ -461,7 +463,9 @@ private fun BottomPayBar(
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    "THANH TOÁN NGAY",
+
+                    if (method.isImplemented) "THANH TOÁN NGAY"
+                    else "SẮP RA MẮT",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 0.5.sp

@@ -23,6 +23,12 @@ fun CreatePatientProfileScreen(
         }
     }
 
+    val isFormValid =
+        uiState.fullName.isNotBlank() &&
+                uiState.dateOfBirth.isNotBlank() &&
+                uiState.gender.isNotBlank() &&
+                uiState.phoneNumber.isNotBlank()
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
@@ -32,12 +38,12 @@ fun CreatePatientProfileScreen(
             BottomSaveBar(
                 isDefault = uiState.isDefault,
                 isLoading = uiState.isLoading,
+                isFormValid = isFormValid,
                 onToggle = {
                     viewModel.onEvent(CreatePatientProfileEvent.DefaultChanged(it))
                 },
-                onSave = {
-                    viewModel.onEvent(CreatePatientProfileEvent.SaveProfile)
-                }
+                onSave = { viewModel.onEvent(CreatePatientProfileEvent.SaveProfile) }
+
             )
         }
     ) { padding ->

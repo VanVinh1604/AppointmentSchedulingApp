@@ -14,5 +14,7 @@ sealed class BookingEvent {
     data class PaymentFailure(val message: String = "Thanh toán không thành công") : BookingEvent()
     data class SelectTime(val time: String) : BookingEvent()
     data class SelectPatient(val id: String, val name: String) : BookingEvent()
+
+    data class ShowStep1Error(val message: String) : BookingEvent()
     data object ConfirmBooking : BookingEvent()
 }

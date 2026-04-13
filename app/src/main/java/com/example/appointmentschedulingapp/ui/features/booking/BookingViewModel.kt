@@ -16,6 +16,8 @@ import com.example.appointmentschedulingapp.domain.usecase.clinicUsecase.GetClin
 import com.example.appointmentschedulingapp.domain.usecase.doctorUscase.GetDoctorsByClinicUseCase
 import com.example.appointmentschedulingapp.domain.usecase.patientUsecase.GetPatientProfilesUseCase
 import com.example.appointmentschedulingapp.domain.usecase.bookingUscase.GetBookingsUseCase
+
+import com.example.appointmentschedulingapp.ui.features.booking.steps.components.DEFAULT_PAYMENT_METHODS
 import com.example.appointmentschedulingapp.ui.features.tickets.BookingStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -86,6 +88,12 @@ class BookingViewModel @Inject constructor(
             is BookingEvent.SelectService -> {
                 _uiState.update {
                     it.copy(selectedBookingType = event.service)
+                }
+            }
+
+            is BookingEvent.ShowStep1Error -> {
+                _uiState.update {
+                    it.copy(step1Error = event.message)
                 }
             }
 
@@ -227,12 +235,23 @@ class BookingViewModel @Inject constructor(
 
     private fun confirmBooking() {
         viewModelScope.launch {
+            val method = _uiState.value.selectedPaymentMethod
+            val selectedMethod = DEFAULT_PAYMENT_METHODS.find { it.id == method }
+
+            if (selectedMethod?.isImplemented != true) {
+                _uiState.update {
+                    it.copy(
+                        errorMessage = "Phương thức này đang được phát triển",
+                        isLoading = false
+                    )
+                }
+                return@launch
+            }
+
             _uiState.update { it.copy(isLoading = true) }
 
             confirmBookingWithPaymentUseCase(_uiState.value)
-                .onSuccess { paymentResult ->
-                    handlePaymentResult(paymentResult)
-                }
+                .onSuccess(::handlePaymentResult)
                 .onFailure { error ->
                     _uiState.update {
                         it.copy(
@@ -282,50 +301,26 @@ class BookingViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Kiểm tra trạng thái thanh toán từ backend khi user quay về từ MoMo
-     * Sử dụng polling (kiểm tra lặp lại) mỗi 2 giây trong tối đa 30 giây
-     */
-    fun verifyPaymentStatus(bookingId: String) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-
-            var attempts = 0
-            var confirmed = false
-
-            while (attempts < MAX_POLLING_ATTEMPTS && !confirmed) {
-                // ✅ Dùng getBookingById thay vì getBookings
-                getBookingByIdUseCase(bookingId)
-                    .onSuccess { booking ->
-                        val status = booking.status.name
-                        Log.d(TAG, "Attempt $attempts: status=$status, bookingId=$bookingId")
-
-                        if (status in listOf("PAID", "CONFIRMED", "COMPLETED")) {
-                            confirmed = true
-                            _uiState.update {
-                                it.copy(isLoading = false, isSuccess = true, bookingId = bookingId)
-                            }
-                        }
-                    }
-                    .onFailure { Log.e(TAG, "Attempt $attempts failed: ${it.message}") }
-
-                if (!confirmed) {
-                    attempts++
-                    delay(POLLING_INTERVAL)
-                }
-            }
-
-            if (!confirmed) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        errorMessage = "Không thể xác nhận thanh toán. Vui lòng kiểm tra lại."
-                    )
-                }
-            }
-        }
-    }
-
+//    fun isStep1Valid(): Boolean {
+//        val state = _uiState.value
+//        return state.selectedSpecialty.isNotBlank() &&
+//                state.selectedBookingType.isNotBlank() &&
+//                state.selectedDate.isNotBlank() &&
+//                state.selectedTime.isNotBlank()
+//    }
+//    fun validateStep1(): Boolean {
+//        val isValid = isStep1Valid()
+//
+//        _uiState.update {
+//            it.copy(
+//                step1Error = if (!isValid)
+//                    "Vui lòng chọn đầy đủ thông tin khám"
+//                else null
+//            )
+//        }
+//
+//        return isValid
+//    }
     // BookingViewModel.kt
     private fun observeBookingStatus(bookingId: String) {
         viewModelScope.launch {

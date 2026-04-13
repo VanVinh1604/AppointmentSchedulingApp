@@ -25,6 +25,7 @@ fun BottomSaveBar(
     isDefault: Boolean,
     isLoading: Boolean,
     onToggle: (Boolean) -> Unit,
+    isFormValid: Boolean,
     onSave: () -> Unit
 ) {
     Surface(shadowElevation = 8.dp) {
@@ -50,10 +51,11 @@ fun BottomSaveBar(
 
             Button(
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = PatientUiColors.PrimaryBlue
-                ) ,
+                    containerColor = PatientUiColors.PrimaryBlue,
+                    disabledContainerColor = androidx.compose.ui.graphics.Color.LightGray
+                ),
                 onClick = onSave,
-                enabled = !isLoading,
+                enabled = !isLoading && isFormValid,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)

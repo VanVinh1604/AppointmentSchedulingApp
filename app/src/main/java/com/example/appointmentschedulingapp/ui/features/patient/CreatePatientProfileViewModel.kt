@@ -64,9 +64,16 @@ class CreatePatientProfileViewModel @Inject constructor(
     }
 
     private fun saveProfile() = viewModelScope.launch {
-        updateState { copy(isLoading = true, error = null) }
-
         val state = _uiState.value
+
+        if (!isFormValid(state)) {
+            updateState {
+                copy(error = "Vui lòng nhập đầy đủ thông tin bắt buộc")
+            }
+            return@launch
+        }
+
+        updateState { copy(isLoading = true, error = null) }
 
         val profile = PatientProfile(
             fullName = state.fullName,
@@ -102,5 +109,12 @@ class CreatePatientProfileViewModel @Inject constructor(
         block: CreatePatientProfileUiState.() -> CreatePatientProfileUiState
     ) {
         _uiState.value = _uiState.value.block()
+    }
+
+    private fun isFormValid(state: CreatePatientProfileUiState): Boolean {
+        return state.fullName.isNotBlank() &&
+                state.dateOfBirth.isNotBlank() &&
+                state.gender.isNotBlank() &&
+                state.phoneNumber.isNotBlank()
     }
 }
