@@ -15,6 +15,8 @@ import com.example.appointmentschedulingapp.domain.usecase.clinicUsecase.GetClin
 import com.example.appointmentschedulingapp.domain.usecase.doctorUscase.GetDoctorsByClinicUseCase
 import com.example.appointmentschedulingapp.domain.usecase.patientUsecase.GetPatientProfilesUseCase
 import com.example.appointmentschedulingapp.domain.usecase.bookingUscase.GetBookingsUseCase
+import com.example.appointmentschedulingapp.domain.usecase.bookingUscase.ObserveBookingsUseCase
+import com.example.appointmentschedulingapp.domain.usecase.bookingUscase.UpdateBookingStatusUseCase
 
 import com.example.appointmentschedulingapp.ui.features.booking.steps.components.DEFAULT_PAYMENT_METHODS
 import com.example.appointmentschedulingapp.ui.features.tickets.BookingStatus
@@ -31,7 +33,8 @@ class BookingViewModel @Inject constructor(
     private val getPatientProfilesUseCase: GetPatientProfilesUseCase,
     private val getBookingsUseCase: GetBookingsUseCase,
     private val getBookingByIdUseCase: GetBookingByIdUseCase,
-    private val bookingRepository: BookingRepository
+    private val observeBookingsUseCase: ObserveBookingsUseCase,      // ← thêm
+    private val updateBookingStatusUseCase: UpdateBookingStatusUseCase
 
 ) : ViewModel() {
 
@@ -320,43 +323,39 @@ class BookingViewModel @Inject constructor(
 //        return isValid
 //    }
     // BookingViewModel.kt
-    private fun observeBookingStatus(bookingId: String) {
-        viewModelScope.launch {
-            bookingRepository.observeBookings()
-                .collect { bookings ->
-                    val booking = bookings.firstOrNull { it.id == bookingId } ?: return@collect
-                    val status = booking.status.name
+private fun observeBookingStatus(bookingId: String) {
+    viewModelScope.launch {
+        getBookingsUseCase() // seed Room trước
 
-                    if (status in listOf("PAID", "CONFIRMED", "COMPLETED")) {
-                        _uiState.update {
-                            it.copy(isLoading = false, isSuccess = true, bookingId = bookingId)
-                        }
+        observeBookingsUseCase()
+            .collect { bookings ->
+                val booking = bookings.firstOrNull { it.id == bookingId } ?: return@collect
+                if (booking.status.name in listOf("PAID", "CONFIRMED", "COMPLETED")) {
+                    _uiState.update {
+                        it.copy(isLoading = false, isSuccess = true, bookingId = bookingId)
                     }
                 }
-        }
-
-
+            }
     }
+}
+
     fun onMomoPaymentReturned(bookingId: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            bookingRepository.updateBookingStatus(
-                bookingId = bookingId,
-                status = BookingStatus.CONFIRMED
-            ).onSuccess {
-                // ✅ Clear saved state sau khi thành công
-                savedStateHandle.remove<String>("bookingId")
-                savedStateHandle.remove<String>("momoPayUrl")
-
-                _uiState.update {
-                    it.copy(isLoading = false, isSuccess = true, bookingId = bookingId)
+            updateBookingStatusUseCase(bookingId, BookingStatus.CONFIRMED)
+                .onSuccess {
+                    savedStateHandle.remove<String>("bookingId")
+                    savedStateHandle.remove<String>("momoPayUrl")
+                    _uiState.update {
+                        it.copy(isLoading = false, isSuccess = true, bookingId = bookingId)
+                    }
                 }
-            }.onFailure { error ->
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = "Lỗi xác nhận thanh toán: ${error.message}")
+                .onFailure { error ->
+                    _uiState.update {
+                        it.copy(isLoading = false, errorMessage = "Lỗi xác nhận thanh toán: ${error.message}")
+                    }
                 }
-            }
         }
     }
 }

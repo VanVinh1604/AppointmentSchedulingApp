@@ -12,6 +12,12 @@ interface ClinicDao {
     @Query("SELECT * FROM clinics")
     suspend fun getClinics(): List<ClinicEntity>
 
+    @Query("SELECT * FROM clinics WHERE id = :id")
+    suspend fun getClinicById(id: String): ClinicEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertClinics(clinics: List<ClinicEntity>)
+
+    @Query("DELETE FROM clinics")
+    suspend fun clearClinics()
 }

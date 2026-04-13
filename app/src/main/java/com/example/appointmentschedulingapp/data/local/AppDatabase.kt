@@ -5,23 +5,32 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.appointmentschedulingapp.common.Config
+import com.example.appointmentschedulingapp.data.local.dao.BookingDao
 import com.example.appointmentschedulingapp.data.local.dao.ClinicDao
 import com.example.appointmentschedulingapp.data.local.dao.DoctorDao
+import com.example.appointmentschedulingapp.data.local.dao.PatientProfileDao
+import com.example.appointmentschedulingapp.data.local.entity.BookingEntity
 import com.example.appointmentschedulingapp.data.local.entity.ClinicEntity
 import com.example.appointmentschedulingapp.data.local.entity.DoctorEntity
+import com.example.appointmentschedulingapp.data.local.entity.PatientProfileEntity
 
 @Database(
     entities = [
         ClinicEntity::class,
-        DoctorEntity::class
+        DoctorEntity::class,
+        PatientProfileEntity::class,
+        BookingEntity::class
     ],
-    version = 1,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun clinicDao(): ClinicDao
     abstract fun doctorDao(): DoctorDao
+
+    abstract fun patientProfileDao(): PatientProfileDao
+    abstract fun bookingDao(): BookingDao
 
     companion object {
         @Volatile
@@ -33,7 +42,10 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     Config.DATABASE_NAME
-                ).build().also { INSTANCE = it }
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
+                    .also { INSTANCE = it }
             }
         }
     }

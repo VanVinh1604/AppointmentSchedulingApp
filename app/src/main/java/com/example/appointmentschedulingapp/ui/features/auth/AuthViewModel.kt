@@ -4,7 +4,7 @@ import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appointmentschedulingapp.core.helper.ErrorHelper
-import com.example.appointmentschedulingapp.domain.usecase.patientUsecase.CheckProfileUseCase
+import com.example.appointmentschedulingapp.domain.usecase.athuUsecase.CheckProfileUseCase
 import com.example.appointmentschedulingapp.domain.usecase.athuUsecase.CreateUserProfileUseCase
 import com.example.appointmentschedulingapp.domain.usecase.athuUsecase.SendOtpUseCase
 import com.example.appointmentschedulingapp.domain.usecase.athuUsecase.VerifyOtpUseCase
@@ -83,6 +83,9 @@ class AuthViewModel @Inject constructor(
                                 _uiState.update { it.copy(authMessage = "Đang tạo hồ sơ...") }
                                 createUserProfileUseCase(_uiState.value.phone)
                             }
+                        }
+                        .onFailure {
+                            // Không block login — chỉ log, vẫn cho vào Home
                         }
 
                     // ✅ Session đã được lưu trong AuthRepositoryImpl.verifyOtp()

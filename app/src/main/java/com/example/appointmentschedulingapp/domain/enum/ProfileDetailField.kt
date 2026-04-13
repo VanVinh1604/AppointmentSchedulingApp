@@ -1,0 +1,7 @@
+package com.example.appointmentschedulingapp.domain.enum
+
+enum class ProfileDetailField {
+    FULL_NAME, DATE_OF_BIRTH, GENDER, PHONE, ADDRESS,
+    IDENTITY_CARD, INSURANCE_NUMBER, INSURANCE_EXPIRY,
+    RELATIONSHIP, EMERGENCY_CONTACT, ALLERGIES, MEDICAL_HISTORY
+}

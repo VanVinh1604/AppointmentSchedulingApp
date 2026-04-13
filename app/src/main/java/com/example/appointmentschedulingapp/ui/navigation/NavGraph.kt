@@ -16,14 +16,14 @@ import com.example.appointmentschedulingapp.ui.features.account.settingContent.T
 import com.example.appointmentschedulingapp.ui.features.auth.AuthRoute
 import com.example.appointmentschedulingapp.ui.features.auth.AuthViewModel
 import com.example.appointmentschedulingapp.ui.features.auth.OtpRoute
+import com.example.appointmentschedulingapp.ui.features.booking.ClinicDetailScreen
 import com.example.appointmentschedulingapp.ui.features.doctor.DoctorDetailScreen
 
 import com.example.appointmentschedulingapp.ui.features.home.HomeScreen
 import com.example.appointmentschedulingapp.ui.features.notifications.NotificationsScreen
 import com.example.appointmentschedulingapp.ui.features.patient.CreatePatientProfileScreen
+import com.example.appointmentschedulingapp.ui.features.profile.ProfileDetailScreen
 import com.example.appointmentschedulingapp.ui.features.profile.ProfileScreen
-import com.example.appointmentschedulingapp.ui.features.tickets.TicketsScreen
-
 @Composable
 fun AppNavGraph(navController: NavHostController,
                 session: User,
@@ -124,6 +124,22 @@ fun AppNavGraph(navController: NavHostController,
             )
         }
 
+        composable(
+            route = Screen.ClinicDetail.route,
+            arguments = listOf(
+                navArgument("clinicId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val clinicId = backStackEntry.arguments?.getString("clinicId") ?: ""
+
+            ClinicDetailScreen(
+                clinicId = clinicId,
+                onBack = { navController.popBackStack() },
+//                onBookNow = {
+//                    navController.navigate(Screen.BookingStep1.route)
+//                }
+            )
+        }
         composable(Screen.CreatePatientProfile.route) {
             CreatePatientProfileScreen(
                 onBack = { isCreated ->
@@ -158,7 +174,19 @@ fun AppNavGraph(navController: NavHostController,
             ProfileScreen(
                 onNavigateToCreateProfile = {
                     navController.navigate(Screen.CreatePatientProfile.route)
+                },
+                onNavigateToDetail = { profileId ->           // ← thêm
+                    navController.navigate(Screen.ProfileDetail.createRoute(profileId))
                 }
+            )
+        }
+
+        composable(
+            route = Screen.ProfileDetail.route,
+            arguments = listOf(navArgument("profileId") { type = NavType.StringType })
+        ) {
+            ProfileDetailScreen(
+                onBack = { navController.popBackStack() }
             )
         }
     }

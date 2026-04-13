@@ -2,6 +2,7 @@ package com.example.appointmentschedulingapp.ui.features.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,7 +29,8 @@ import com.example.appointmentschedulingapp.domain.model.PatientProfile
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    onNavigateToCreateProfile: () -> Unit
+    onNavigateToCreateProfile: () -> Unit,
+    onNavigateToDetail: (String) -> Unit
 ) {
     val viewModel: ProfileViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
@@ -93,7 +95,9 @@ fun ProfileScreen(
                             profile = profile,
                             primaryColor = primaryColor,
                             darkBlueText = darkBlueText,
-                            lightBlueBg = lightBlueBg
+                            lightBlueBg = lightBlueBg,
+                            onClick = { onNavigateToDetail(profile.id) }  // ← thêm
+
                         )
                     }
                 }
@@ -118,12 +122,15 @@ fun ProfileScreen(
 private fun PatientProfileItem(
     profile: PatientProfile,
     primaryColor: Color,
+    onClick: () -> Unit,
     darkBlueText: Color,
-    lightBlueBg: Color
+    lightBlueBg: Color,
+
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
+
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {

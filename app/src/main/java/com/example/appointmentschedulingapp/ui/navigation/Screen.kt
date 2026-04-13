@@ -14,6 +14,13 @@ sealed class Screen(
     object Ticket : Screen("Ticket", "Phiếu Khám", Icons.Default.ConfirmationNumber)
     object Notification : Screen("Notification", "Thông báo", Icons.Default.Notifications)
     object Profile : Screen("Profile", "Hồ sơ", Icons.Default.AccountBox)
+    object ProfileDetail : Screen(
+        "profile_detail/{profileId}",
+        "Chi tiết hồ sơ",
+        Icons.Default.AccountBox
+    ) {
+        fun createRoute(profileId: String) = "profile_detail/$profileId"
+    }
     object CreatePatientProfile : Screen("create_patient_profile", "Tạo hồ sơ bệnh nhân", Icons.Default.PersonAdd)
     object Account : Screen("Account", "Tài khoản", Icons.Default.Person)
 

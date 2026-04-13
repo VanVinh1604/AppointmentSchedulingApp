@@ -21,14 +21,15 @@ object DatabaseModule {
         return AppDatabase.getInstance(context)
     }
 
-
-
-//    @Provides
-//    fun provideEventDao(db: AppDatabase) = db.eventDao()
-
     @Provides
     fun provideClinicDao(db: AppDatabase) = db.clinicDao()
 
     @Provides
     fun provideDoctorDao(db: AppDatabase) = db.doctorDao()
+
+    @Provides
+    fun providePatientProfileDao(db: AppDatabase) = db.patientProfileDao()
+
+    @Provides
+    fun provideBookingDao(db: AppDatabase) = db.bookingDao()
 }
