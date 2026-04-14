@@ -27,7 +27,7 @@ import com.example.appointmentschedulingapp.data.local.entity.location.WardEntit
         WardEntity::class
 
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

@@ -19,7 +19,9 @@ fun Booking.toEntity(userId: String) = BookingEntity(
     appointmentTime = appointmentTime, consultationFee = consultationFee,
     paymentMethod = paymentMethod,
     status = status.name,
-    createdAt = createdAt
+    createdAt = createdAt,
+
+    synced = false
 )
 
 fun BookingEntity.toDomain() = Booking(

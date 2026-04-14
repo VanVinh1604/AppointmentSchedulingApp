@@ -27,4 +27,11 @@ interface BookingDao {
 
     @Query("DELETE FROM bookings WHERE userId = :userId")
     suspend fun clearBookings(userId: String)
+
+
+    @Query("UPDATE bookings SET synced = 1 WHERE id = :bookingId")
+    suspend fun markAsSynced(bookingId: String)
+
+    @Query("SELECT * FROM bookings WHERE userId = :uid AND status = :status AND synced = 0")
+    suspend fun getBookingsByStatus(uid: String, status: String): List<BookingEntity>
 }

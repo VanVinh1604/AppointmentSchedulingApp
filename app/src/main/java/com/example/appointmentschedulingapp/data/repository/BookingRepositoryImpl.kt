@@ -11,14 +11,14 @@ import com.example.appointmentschedulingapp.ui.features.tickets.BookingStatus
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -44,9 +44,11 @@ class BookingRepositoryImpl @Inject constructor(
         withContext(dispatcher) {
             runCatching {
                 val uid = requireUid()
-                println("DEBUG uid = $uid")
 
-                val ref = firebaseDatabase.getReference(Config.FIREBASE_BOOKINGS).push()
+                val ref = firebaseDatabase
+                    .getReference(Config.FIREBASE_BOOKINGS)
+                    .push()
+
                 val bookingId = ref.key ?: error("push key null")
 
                 val bookingWithId = booking.copy(id = bookingId)
@@ -56,14 +58,17 @@ class BookingRepositoryImpl @Inject constructor(
                     "${Config.FIREBASE_USER_BOOKINGS}/$uid/$bookingId" to true
                 )
 
-                println("DEBUG updates = $updates")
+                // ✅ Payment flow phải chờ chắc chắn Firebase tạo xong
+                firebaseDatabase.reference
+                    .updateChildren(updates)
+                    .await()
 
-                firebaseDatabase.reference.updateChildren(updates).await()
+                // ✅ Sau khi cloud OK mới sync local
+                bookingDao.insertBooking(
+                    bookingWithId.toEntity(uid)
+                )
 
-                bookingDao.insertBooking(bookingWithId.toEntity(uid))
                 bookingId
-            }.onFailure {
-                it.printStackTrace()
             }
         }
     // --- GET: Room trước, Firebase fallback ---
@@ -97,10 +102,10 @@ class BookingRepositoryImpl @Inject constructor(
     override suspend fun cancelBooking(bookingId: String): Result<Unit> =
         withContext(dispatcher) {
             runCatching {
-                bookingRef(bookingId).child("status")
-                    .setValue(BookingStatus.CANCELLED.name).await()
-
+                // Room trước
                 bookingDao.updateStatus(bookingId, BookingStatus.CANCELLED.name)
+                // Firebase fire-and-forget
+                bookingRef(bookingId).child("status").setValue(BookingStatus.CANCELLED.name)
                 Unit
             }
         }
@@ -111,8 +116,9 @@ class BookingRepositoryImpl @Inject constructor(
         status: BookingStatus
     ): Result<Unit> = withContext(dispatcher) {
         runCatching {
-            bookingRef(bookingId).child("status").setValue(status.name).await()
             bookingDao.updateStatus(bookingId, status.name)
+            bookingRef(bookingId).child("status").setValue(status.name)
+
             Unit
         }
     }
@@ -178,4 +184,40 @@ class BookingRepositoryImpl @Inject constructor(
             createdAt = child("createdAt").getValue(Long::class.java) ?: System.currentTimeMillis()
         )
     }.getOrNull()
+
+    override suspend fun syncPendingBookings(): Result<Unit> =
+        Result.success(Unit)  // Firebase SDK tự lo, placeholder cho Spring Boot sau này
+
+//    override suspend fun syncPendingBookings(): Result<Unit> =
+//        withContext(dispatcher) {
+//            runCatching {
+//                val uid = requireUid()
+//
+//                // Lấy các booking PENDING còn trong Room
+//                val pendingBookings = bookingDao.getBookingsByStatus(
+//                    uid = uid,
+//                    status = BookingStatus.PENDING.name
+//                )
+//
+//                if (pendingBookings.isEmpty()) return@runCatching Unit
+//
+//                pendingBookings.forEach { entity ->
+//                    val booking = entity.toDomain()
+//
+//                    // Kiểm tra xem đã tồn tại trên Firebase chưa
+//                    val existsOnFirebase = bookingRef(booking.id).get().await().exists()
+//
+//                    if (!existsOnFirebase) {
+//                        // Chưa có → đẩy lên Firebase
+//                        val updates = hashMapOf<String, Any>(
+//                            "${Config.FIREBASE_BOOKINGS}/${booking.id}" to booking,
+//                            "${Config.FIREBASE_USER_BOOKINGS}/$uid/${booking.id}" to true
+//                        )
+//                        firebaseDatabase.reference.updateChildren(updates).await()
+//                    }
+//                }
+//
+//                Unit
+//            }
+//        }
 }

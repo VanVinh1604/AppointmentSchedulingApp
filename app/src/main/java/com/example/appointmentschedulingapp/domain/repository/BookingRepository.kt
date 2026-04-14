@@ -21,8 +21,9 @@ interface BookingRepository {
     /** Cancels a booking by ID */
     suspend fun cancelBooking(bookingId: String): Result<Unit>
 
-    /** Observes bookings as a live stream (optional – for real-time updates) */
     fun observeBookings(): Flow<List<Booking>>
 
     suspend fun updateBookingStatus(bookingId: String, status: BookingStatus): Result<Unit>
+
+    suspend fun syncPendingBookings(): Result<Unit>
 }
