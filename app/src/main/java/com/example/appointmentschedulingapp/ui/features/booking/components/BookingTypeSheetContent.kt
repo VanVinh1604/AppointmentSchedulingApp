@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddBusiness
 import androidx.compose.material.icons.filled.BedroomChild
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
@@ -34,7 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.appointmentschedulingapp.ui.features.booking.ServiceItemData
+import com.example.appointmentschedulingapp.ui.features.clinicDetail.ServiceItemData
 
 @Composable
 fun BookingTypeSheetContent(

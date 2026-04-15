@@ -1,4 +1,5 @@
-package com.example.appointmentschedulingapp.ui.features.booking
+package com.example.appointmentschedulingapp.ui.features.clinicDetail
+
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -22,6 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.example.appointmentschedulingapp.ui.features.clinicDetail.components.MapSection
+
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +43,8 @@ fun ClinicDetailScreen(
 
     val primaryColor = Color(0xFF1976D2)
     var selectedTab by remember { mutableStateOf("Giới thiệu") }
+
+
 
     Scaffold(
         topBar = {
@@ -88,6 +95,7 @@ fun ClinicDetailScreen(
         }
 
         val clinicData = clinic!!
+
 
         Column(
             modifier = Modifier
@@ -293,15 +301,20 @@ fun ClinicDetailScreen(
                             }
                         }
                     }
+
+
                     "Vị trí" -> {
-                        Column {
-                            Text("Địa chỉ cụ thể:", fontWeight = FontWeight.Bold)
-                            Text("${clinicData.address}, ${clinicData.district}, ${clinicData.city}")
-                            Spacer(Modifier.height(8.dp))
-                            // Ở đây sau này bạn có thể tích hợp Google Maps bằng latitude/longitude
-                            Text("Tọa độ: ${clinicData.latitude}, ${clinicData.longitude}", color = Color.Gray, fontSize = 12.sp)
-                        }
+                        MapSection(
+                            latitude = clinicData.latitude,
+                            longitude = clinicData.longitude,
+                            address = clinicData.address,
+                            district = clinicData.district,
+                            city = clinicData.city,
+                            clinicName = clinicData.name,
+                            primaryColor = primaryColor
+                        )
                     }
+
                     "Đánh giá" -> {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(text = "${clinicData.rating}", fontSize = 32.sp, fontWeight = FontWeight.Bold)

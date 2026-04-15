@@ -1,4 +1,4 @@
-package com.example.appointmentschedulingapp.ui.features.booking
+package com.example.appointmentschedulingapp.ui.features.clinicDetail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

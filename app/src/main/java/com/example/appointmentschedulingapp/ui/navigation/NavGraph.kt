@@ -16,7 +16,7 @@ import com.example.appointmentschedulingapp.ui.features.account.settingContent.T
 import com.example.appointmentschedulingapp.ui.features.auth.AuthRoute
 import com.example.appointmentschedulingapp.ui.features.auth.AuthViewModel
 import com.example.appointmentschedulingapp.ui.features.auth.OtpRoute
-import com.example.appointmentschedulingapp.ui.features.booking.ClinicDetailScreen
+import com.example.appointmentschedulingapp.ui.features.clinicDetail.ClinicDetailScreen
 import com.example.appointmentschedulingapp.ui.features.doctor.DoctorDetailScreen
 
 import com.example.appointmentschedulingapp.ui.features.home.HomeScreen
