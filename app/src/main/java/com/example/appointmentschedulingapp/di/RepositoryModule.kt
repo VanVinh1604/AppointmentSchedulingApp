@@ -6,6 +6,7 @@ import com.example.appointmentschedulingapp.data.repository.BookingRepositoryImp
 import com.example.appointmentschedulingapp.data.repository.ClinicRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.DoctorRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.HomeRepositoryImpl
+import com.example.appointmentschedulingapp.data.repository.NotificationRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.PatientProfileRepositoryImpl
 import com.example.appointmentschedulingapp.data.repository.UserSessionRepositoryImpl
 import com.example.appointmentschedulingapp.domain.payment.CashPaymentProcessor
@@ -17,6 +18,7 @@ import com.example.appointmentschedulingapp.domain.repository.ClinicRepository
 import com.example.appointmentschedulingapp.domain.repository.DoctorRepository
 import com.example.appointmentschedulingapp.domain.repository.HomeRepository
 import com.example.appointmentschedulingapp.domain.repository.LocationRepository
+import com.example.appointmentschedulingapp.domain.repository.NotificationRepository
 import com.example.appointmentschedulingapp.domain.repository.PatientRepository
 import com.example.appointmentschedulingapp.domain.repository.UserSessionRepository
 import dagger.Module
@@ -92,4 +94,10 @@ abstract class RepositoryModule {
     abstract fun bindLocationRepository(
         impl: LocationRepositoryImpl
     ): LocationRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNotificationRepository(
+        impl: NotificationRepositoryImpl
+    ): NotificationRepository
 }

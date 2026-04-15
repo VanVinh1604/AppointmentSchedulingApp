@@ -9,10 +9,12 @@ import com.example.appointmentschedulingapp.data.local.dao.BookingDao
 import com.example.appointmentschedulingapp.data.local.dao.ClinicDao
 import com.example.appointmentschedulingapp.data.local.dao.DoctorDao
 import com.example.appointmentschedulingapp.data.local.dao.LocationDao
+import com.example.appointmentschedulingapp.data.local.dao.NotificationDao
 import com.example.appointmentschedulingapp.data.local.dao.PatientProfileDao
 import com.example.appointmentschedulingapp.data.local.entity.BookingEntity
 import com.example.appointmentschedulingapp.data.local.entity.ClinicEntity
 import com.example.appointmentschedulingapp.data.local.entity.DoctorEntity
+import com.example.appointmentschedulingapp.data.local.entity.NotificationEntity
 import com.example.appointmentschedulingapp.data.local.entity.PatientProfileEntity
 import com.example.appointmentschedulingapp.data.local.entity.location.ProvinceEntity
 import com.example.appointmentschedulingapp.data.local.entity.location.WardEntity
@@ -24,10 +26,10 @@ import com.example.appointmentschedulingapp.data.local.entity.location.WardEntit
         PatientProfileEntity::class,
         BookingEntity::class,
         ProvinceEntity::class,
-        WardEntity::class
-
+        WardEntity::class,
+        NotificationEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -39,6 +41,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun bookingDao(): BookingDao
 
     abstract fun locationDao(): LocationDao
+    abstract fun notificationDao(): NotificationDao
 
     companion object {
         @Volatile

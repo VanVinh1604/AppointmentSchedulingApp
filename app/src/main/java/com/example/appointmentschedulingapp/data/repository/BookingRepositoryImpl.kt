@@ -7,18 +7,19 @@ import com.example.appointmentschedulingapp.data.local.mapper.toEntity
 import com.example.appointmentschedulingapp.di.IoDispatcher
 import com.example.appointmentschedulingapp.domain.model.Booking
 import com.example.appointmentschedulingapp.domain.repository.BookingRepository
+import com.example.appointmentschedulingapp.domain.usecase.notification.ScheduleReminderUseCase
+import java.text.SimpleDateFormat
+import java.util.Locale
 import com.example.appointmentschedulingapp.ui.features.tickets.BookingStatus
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -27,6 +28,7 @@ class BookingRepositoryImpl @Inject constructor(
     private val firebaseDatabase: FirebaseDatabase,
     private val auth: FirebaseAuth,
     private val bookingDao: BookingDao,
+    private val scheduleReminderUseCase: ScheduleReminderUseCase,
     @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) : BookingRepository {
 
@@ -58,14 +60,26 @@ class BookingRepositoryImpl @Inject constructor(
                     "${Config.FIREBASE_USER_BOOKINGS}/$uid/$bookingId" to true
                 )
 
-                // ✅ Payment flow phải chờ chắc chắn Firebase tạo xong
                 firebaseDatabase.reference
                     .updateChildren(updates)
                     .await()
 
-                // ✅ Sau khi cloud OK mới sync local
                 bookingDao.insertBooking(
                     bookingWithId.toEntity(uid)
+                )
+
+                // ✅ schedule reminder sau khi booking thành công
+                val appointmentMillis =
+                    convertToMillis(
+                        booking.appointmentDate,
+                        booking.appointmentTime
+                    )
+
+                scheduleReminderUseCase(
+                    bookingId = bookingId,
+                    clinicName = booking.clinicName,
+                    patientName = booking.patientName,
+                    appointmentTimeMillis = appointmentMillis
                 )
 
                 bookingId
@@ -185,6 +199,25 @@ class BookingRepositoryImpl @Inject constructor(
         )
     }.getOrNull()
 
+    private fun convertToMillis(
+        date: String,
+        time: String
+    ): Long {
+        return try {
+            val fullDateTime = "$date 08:00"
+
+            val formatter = SimpleDateFormat(
+                "dd/MM/yyyy HH:mm",
+                Locale.getDefault()
+            )
+
+            formatter.parse(fullDateTime)?.time
+                ?: System.currentTimeMillis()
+
+        } catch (e: Exception) {
+            System.currentTimeMillis()
+        }
+    }
     override suspend fun syncPendingBookings(): Result<Unit> =
         Result.success(Unit)  // Firebase SDK tự lo, placeholder cho Spring Boot sau này
 

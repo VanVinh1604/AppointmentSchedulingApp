@@ -5,6 +5,7 @@ data class AppNotification(
     val title: String,
     val message: String,
     val bookingId: String?,
+    val triggerAt: Long,
     val createdAt: Long,
     val isRead: Boolean
 )

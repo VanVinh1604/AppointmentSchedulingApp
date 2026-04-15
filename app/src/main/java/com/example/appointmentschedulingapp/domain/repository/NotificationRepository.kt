@@ -5,12 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface NotificationRepository {
     fun observeNotifications(): Flow<List<AppNotification>>
-    suspend fun saveNotification(notification: AppNotification)
-    suspend fun markAsRead(id: String)
+    suspend fun insertNotification(notification: AppNotification)
     suspend fun markAllAsRead()
-    suspend fun scheduleAppointmentReminder(
-        bookingId: String,
-        clinicName: String,
-        appointmentTimeMillis: Long
-    )
 }

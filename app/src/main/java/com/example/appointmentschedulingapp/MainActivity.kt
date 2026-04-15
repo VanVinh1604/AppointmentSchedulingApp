@@ -1,10 +1,14 @@
 package com.example.appointmentschedulingapp
 
+import android.Manifest
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -18,11 +22,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.example.appointmentschedulingapp.domain.payment.momoPayment.MomoCallbackBus
 import com.example.appointmentschedulingapp.ui.navigation.AppNavGraph
 import com.example.appointmentschedulingapp.ui.navigation.MyBottomBar
 import com.example.appointmentschedulingapp.ui.theme.AppointmentSchedulingAppTheme
+import com.example.appointmentschedulingapp.workers.AppointmentReminderWorker
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.concurrent.TimeUnit
 
 
 // File: MainActivity.kt
@@ -44,6 +53,7 @@ class MainActivity : ComponentActivity() {
         Log.d(TAG, "onCreate intent data: ${intent?.data}")
         Log.d(TAG, "onCreate intent extras: ${intent?.extras}")
 
+
         setContent {
             AppointmentSchedulingAppTheme {
                 // 2. GÁN trực tiếp vào biến toàn cục thay vì khai báo 'val' mới
@@ -51,6 +61,8 @@ class MainActivity : ComponentActivity() {
 
                 val sessionViewModel: UserSessionViewModel = hiltViewModel()
                 val session by sessionViewModel.session.collectAsState()
+
+                RequestNotificationPermission()
 
                 Scaffold(
                     bottomBar = { MyBottomBar(navController) }
@@ -78,6 +90,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+
             }
         }
     }
@@ -124,6 +137,28 @@ class MainActivity : ComponentActivity() {
                     Log.d(TAG, "MoMo CANCEL")
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun RequestNotificationPermission() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) {}
+
+    LaunchedEffect(Unit) {
+        val granted = androidx.core.content.ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+        if (!granted) {
+            launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
 }

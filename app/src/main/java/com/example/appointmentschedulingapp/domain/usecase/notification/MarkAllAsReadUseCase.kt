@@ -3,8 +3,10 @@ package com.example.appointmentschedulingapp.domain.usecase.notification
 import com.example.appointmentschedulingapp.domain.repository.NotificationRepository
 import javax.inject.Inject
 
-class GetNotificationsUseCase @Inject constructor(
+class MarkAllAsReadUseCase @Inject constructor(
     private val repository: NotificationRepository
 ) {
-    operator fun invoke() = repository.observeNotifications()
+    suspend operator fun invoke() {
+        repository.markAllAsRead()
+    }
 }

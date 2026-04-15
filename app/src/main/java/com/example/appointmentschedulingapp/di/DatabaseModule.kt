@@ -2,6 +2,7 @@ package com.example.appointmentschedulingapp.di
 
 import android.content.Context
 import com.example.appointmentschedulingapp.data.local.AppDatabase
+import com.example.appointmentschedulingapp.data.local.dao.NotificationDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,4 +36,9 @@ object DatabaseModule {
 
     @Provides
     fun provideLocationDao(db: AppDatabase) = db.locationDao()
+
+    @Provides
+    fun provideNotificationDao(db: AppDatabase): NotificationDao {
+        return db.notificationDao()
+    }
 }
