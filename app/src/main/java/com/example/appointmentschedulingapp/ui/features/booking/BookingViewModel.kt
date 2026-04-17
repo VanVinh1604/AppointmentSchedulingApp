@@ -3,6 +3,7 @@ package com.example.appointmentschedulingapp.ui.features.booking
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.appointmentschedulingapp.domain.model.ConfirmBookingRequest
 import com.example.appointmentschedulingapp.domain.payment.momoPayment.MomoCallbackBus
 import com.example.appointmentschedulingapp.domain.payment.PaymentResult
 import com.example.appointmentschedulingapp.domain.repository.BookingRepository
@@ -55,12 +56,13 @@ class BookingViewModel @Inject constructor(
 
         viewModelScope.launch {
             MomoCallbackBus.events.collect { orderId ->
-                if (_uiState.value.momoPayUrl != null) {
+                MomoCallbackBus.events.collect { orderId ->
                     val bookingId = if (orderId == "__momo_success__") {
                         _uiState.value.bookingId
                     } else {
                         orderId
                     }
+
                     if (bookingId.isNotEmpty()) {
                         onMomoPaymentReturned(bookingId)
                     }
@@ -236,29 +238,31 @@ class BookingViewModel @Inject constructor(
 
     private fun confirmBooking() {
         viewModelScope.launch {
-            val method = _uiState.value.selectedPaymentMethod
-            val selectedMethod = DEFAULT_PAYMENT_METHODS.find { it.id == method }
+            val state = _uiState.value
 
-            if (selectedMethod?.isImplemented != true) {
-                _uiState.update {
-                    it.copy(
-                        errorMessage = "Phương thức này đang được phát triển",
-                        isLoading = false
-                    )
-                }
-                return@launch
-            }
+            val request = ConfirmBookingRequest(
+                clinicId = state.selectedClinic?.id ?: "",
+                clinicName = state.selectedClinic?.name ?: "",
+                clinicAddress = state.selectedClinic?.address ?: "",
+                consultationFee = state.selectedClinic?.consultationFee ?: 0L,
 
-            _uiState.update { it.copy(isLoading = true) }
+                patientId = state.selectedPatientId,
+                patientName = state.patientName,
 
-            confirmBookingWithPaymentUseCase(_uiState.value)
+                specialty = state.selectedSpecialty,
+                service = state.selectedBookingType,
+
+                appointmentDate = state.selectedDate,
+                appointmentTime = state.selectedTime,
+
+                paymentMethod = state.selectedPaymentMethod
+            )
+
+            confirmBookingWithPaymentUseCase(request)
                 .onSuccess(::handlePaymentResult)
-                .onFailure { error ->
+                .onFailure {
                     _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = error.message
-                        )
+                        it.copy(isLoading = false, errorMessage = it.errorMessage)
                     }
                 }
         }
