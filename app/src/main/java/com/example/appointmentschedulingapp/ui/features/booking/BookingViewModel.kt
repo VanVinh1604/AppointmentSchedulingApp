@@ -56,16 +56,14 @@ class BookingViewModel @Inject constructor(
 
         viewModelScope.launch {
             MomoCallbackBus.events.collect { orderId ->
-                MomoCallbackBus.events.collect { orderId ->
-                    val bookingId = if (orderId == "__momo_success__") {
-                        _uiState.value.bookingId
-                    } else {
-                        orderId
-                    }
+                val bookingId = if (orderId == "__momo_success__") {
+                    _uiState.value.bookingId
+                } else {
+                    orderId
+                }
 
-                    if (bookingId.isNotEmpty()) {
-                        onMomoPaymentReturned(bookingId)
-                    }
+                if (bookingId.isNotEmpty()) {
+                    onMomoPaymentReturned(bookingId)
                 }
             }
         }

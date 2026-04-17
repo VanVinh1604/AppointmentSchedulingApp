@@ -2,6 +2,7 @@ package com.example.appointmentschedulingapp.ui.features.booking
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -30,21 +31,28 @@ import com.example.appointmentschedulingapp.ui.features.booking.components.Booki
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectClinicScreen( onBack: () -> Unit,
-                        onNavigateToDetail: (String) -> Unit,
-                        onNavigateToBookingStep1: () -> Unit,
-                        viewModel: ClinicViewModel = hiltViewModel(),
-                        bookingViewModel: BookingViewModel = hiltViewModel()) {
-
-    val clinics by viewModel.clinics.collectAsState()
+fun SelectClinicScreen(
+    onBack: () -> Unit,
+    onNavigateToDetail: (String) -> Unit,
+    onNavigateToBookingStep1: () -> Unit,
+    viewModel: ClinicViewModel = hiltViewModel(),
+    bookingViewModel: BookingViewModel = hiltViewModel()
+) {
     val primaryColor = Color(0xFF1976D2)
     val lightBlue = Color(0xFFE3F2FD)
 
-//    val bookingViewModel: BookingViewModel = hiltViewModel()
+    val filteredClinics by viewModel.filteredClinics.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val selectedCity by viewModel.selectedCity.collectAsState()
+    val availableCities by viewModel.availableCities.collectAsState()
+
+    var showCityFilterSheet by remember { mutableStateOf(false) }
+    var citySearchQuery by remember { mutableStateOf("") }
     var showBottomSheet by remember { mutableStateOf(false) }
     var selectedClinic by remember { mutableStateOf<Clinic?>(null) }
 
-    val sheetState = rememberModalBottomSheetState()
+    val bookingSheetState = rememberModalBottomSheetState()
+    val filterSheetState = rememberModalBottomSheetState()
 
     Scaffold(
         topBar = {
@@ -70,17 +78,20 @@ fun SelectClinicScreen( onBack: () -> Unit,
 
             // --- SEARCH & FILTER ROW ---
             Row(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedTextField(
-                    value = "",
-                    onValueChange = {},
+                    value = searchQuery,
+                    onValueChange = { viewModel.onSearchQueryChange(it) },
                     placeholder = { Text("Tìm kiếm cơ sở...", fontSize = 14.sp) },
-                    modifier = Modifier.weight(1f).height(56.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp),
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     shape = RoundedCornerShape(12.dp),
-                    // Cập nhật tham số colors chuẩn M3
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = Color.White,
                         unfocusedContainerColor = Color.White,
@@ -89,34 +100,60 @@ fun SelectClinicScreen( onBack: () -> Unit,
                     )
                 )
                 Spacer(modifier = Modifier.width(12.dp))
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(bottom = 4.dp)
+
+                // --- NÚT LỌC MỞ BOTTOM SHEET ---
+                Surface(
+                    onClick = {
+                        citySearchQuery = ""
+                        showCityFilterSheet = true
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (selectedCity != "Tất cả") primaryColor else Color.White,
+                    border = BorderStroke(1.dp, if (selectedCity != "Tất cả") primaryColor else Color.LightGray),
+                    modifier = Modifier.size(56.dp)
                 ) {
-                    Icon(Icons.Default.FilterList, contentDescription = null, tint = primaryColor)
-                    Text("Lọc", fontSize = 10.sp, color = primaryColor, fontWeight = FontWeight.Bold)
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            Icons.Default.FilterList,
+                            contentDescription = "Lọc",
+                            tint = if (selectedCity != "Tất cả") Color.White else primaryColor
+                        )
+                    }
                 }
             }
 
-            // --- FILTER CHIPS ---
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.Start
-            ) {
-                listOf("Tất cả", "Bệnh viện", "Phòng mạch").forEach { label ->
-                    val isSelected = label == "Tất cả"
+            // --- CHIP HIỂN THỊ THÀNH PHỐ ĐANG CHỌN (nếu có) ---
+            if (selectedCity != "Tất cả") {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Surface(
-                        modifier = Modifier.padding(end = 8.dp),
                         shape = RoundedCornerShape(20.dp),
-                        color = if (isSelected) primaryColor else Color.White,
-                        border = if (!isSelected) BorderStroke(1.dp, Color.LightGray) else null
+                        color = lightBlue,
+                        border = BorderStroke(1.dp, primaryColor)
                     ) {
-                        Text(
-                            text = label,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-                            color = if (isSelected) Color.White else Color.Black,
-                            fontSize = 12.sp
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.LocationOn,
+                                contentDescription = null,
+                                tint = primaryColor,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(selectedCity, fontSize = 12.sp, color = primaryColor, fontWeight = FontWeight.Medium)
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Xóa lọc",
+                                tint = primaryColor,
+                                modifier = Modifier
+                                    .size(14.dp)
+                                    .clickable { viewModel.onCitySelected("Tất cả") }
+                            )
+                        }
                     }
                 }
             }
@@ -126,7 +163,7 @@ fun SelectClinicScreen( onBack: () -> Unit,
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(clinics, key = { it.id }) { clinic ->
+                items(filteredClinics, key = { it.id }) { clinic ->
                     ClinicCard(
                         clinic = clinic,
                         primaryColor = primaryColor,
@@ -139,44 +176,150 @@ fun SelectClinicScreen( onBack: () -> Unit,
                     )
                 }
             }
-
-            // --- MODAL BOTTOM SHEET ---
-            if (showBottomSheet && selectedClinic != null) {
-                ModalBottomSheet(
-                    onDismissRequest = { showBottomSheet = false },
-                    sheetState = sheetState
-                ) {
-                    BookingTypeSheetContent(
-                        clinicName = selectedClinic!!.name,
-                        onClose = { showBottomSheet = false },
-                        onTypeSelected = { serviceType ->
-                            showBottomSheet = false
-
-                            // 2. LƯU DỮ LIỆU VÀO VIEWMODEL TRƯỚC KHI CHUYỂN TRANG
-                            bookingViewModel.onEvent(
-                                BookingEvent.SelectClinic(selectedClinic!!)
-                            )
-
-                            bookingViewModel.onEvent(
-                                BookingEvent.SelectService(serviceType)
-                            )
-
-                            onNavigateToBookingStep1() // Sau đó mới chuyển trang
-                        }
-                    )
-                }
-            }
-
         }
 
+        // --- BOTTOM SHEET LỌC THÀNH PHỐ ---
+        if (showCityFilterSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showCityFilterSheet = false },
+                sheetState = filterSheetState
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 32.dp)
+                ) {
+                    // Tiêu đề
+                    Text(
+                        "Chọn tỉnh / thành phố",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1A1A1A),
+                        modifier = Modifier.padding(vertical = 12.dp)
+                    )
+
+                    HorizontalDivider(color = Color(0xFFEEEEEE))
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Thanh tìm kiếm tỉnh thành
+                    OutlinedTextField(
+                        value = citySearchQuery,
+                        onValueChange = { citySearchQuery = it },
+                        placeholder = { Text("Tìm tỉnh thành...", fontSize = 14.sp) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
+                        leadingIcon = {
+                            Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray)
+                        },
+                        trailingIcon = {
+                            if (citySearchQuery.isNotEmpty()) {
+                                IconButton(onClick = { citySearchQuery = "" }) {
+                                    Icon(Icons.Default.Close, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(18.dp))
+                                }
+                            }
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color(0xFFF8F8F8),
+                            focusedBorderColor = primaryColor,
+                            unfocusedBorderColor = Color.LightGray
+                        ),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Danh sách tỉnh thành được lọc theo citySearchQuery
+                    val filteredCities = availableCities.filter {
+                        it.contains(citySearchQuery, ignoreCase = true)
+                    }
+
+                    LazyColumn(
+                        modifier = Modifier.heightIn(max = 400.dp),
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        items(filteredCities) { city ->
+                            val isSelected = city == selectedCity
+                            Surface(
+                                onClick = {
+                                    viewModel.onCitySelected(city)
+                                    showCityFilterSheet = false
+                                },
+                                shape = RoundedCornerShape(10.dp),
+                                color = if (isSelected) lightBlue else Color.Transparent
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp, vertical = 14.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        Icon(
+                                            if (city == "Tất cả") Icons.Default.Public else Icons.Default.LocationOn,
+                                            contentDescription = null,
+                                            tint = if (isSelected) primaryColor else Color.Gray,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Text(
+                                            city,
+                                            fontSize = 14.sp,
+                                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                            color = if (isSelected) primaryColor else Color(0xFF1A1A1A)
+                                        )
+                                    }
+                                    if (isSelected) {
+                                        Icon(
+                                            Icons.Default.Check,
+                                            contentDescription = null,
+                                            tint = primaryColor,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // --- BOTTOM SHEET ĐẶT KHÁM ---
+        if (showBottomSheet && selectedClinic != null) {
+            ModalBottomSheet(
+                onDismissRequest = { showBottomSheet = false },
+                sheetState = bookingSheetState
+            ) {
+                BookingTypeSheetContent(
+                    clinicName = selectedClinic!!.name,
+                    onClose = { showBottomSheet = false },
+                    onTypeSelected = { serviceType ->
+                        showBottomSheet = false
+                        bookingViewModel.onEvent(BookingEvent.SelectClinic(selectedClinic!!))
+                        bookingViewModel.onEvent(BookingEvent.SelectService(serviceType))
+                        onNavigateToBookingStep1()
+                    }
+                )
+            }
+        }
     }
 }
 
 @Composable
-fun ClinicCard( clinic: Clinic,
-                primaryColor: Color, lightBlue: Color
-                , onDetailClick: (String) -> Unit
-                , onBookingClick: () -> Unit) {
+fun ClinicCard(
+    clinic: Clinic,
+    primaryColor: Color,
+    lightBlue: Color,
+    onDetailClick: (String) -> Unit,
+    onBookingClick: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -188,48 +331,37 @@ fun ClinicCard( clinic: Clinic,
                 modifier = Modifier.padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Logo placeholder
                 AsyncImage(
                     model = clinic.imageUrl,
                     contentDescription = null,
                     modifier = Modifier
-                        .size(65.dp) // Tăng kích thước nhẹ cho dễ nhìn
+                        .size(65.dp)
                         .clip(RoundedCornerShape(10.dp))
                         .background(Color(0xFFF0F0F0)),
                     contentScale = ContentScale.Crop
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
-                    Text(
-                        clinic.name,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp
-                    )
-
-                    Text(
-                        clinic.address,
-                        fontSize = 12.sp,
-                        color = Color.Gray
-                    )
-
-                    Text(
-                        " (${clinic.rating})",
-                        fontSize = 11.sp,
-                        color = Color.Gray
-                    )
+                    Text(clinic.name, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    Text(clinic.address, fontSize = 12.sp, color = Color.Gray)
+                    Text(" (${clinic.rating})", fontSize = 11.sp, color = Color.Gray)
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(top = 4.dp)
                     ) {
                         repeat(5) {
-                            Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFB300), modifier = Modifier.size(14.dp))
+                            Icon(
+                                Icons.Default.Star,
+                                contentDescription = null,
+                                tint = Color(0xFFFFB300),
+                                modifier = Modifier.size(14.dp)
+                            )
                         }
                         Text(" (4.8)", fontSize = 11.sp, color = Color.Gray)
                     }
                 }
             }
 
-            // Bottom 25% area with background
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -238,7 +370,7 @@ fun ClinicCard( clinic: Clinic,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 OutlinedButton(
-                    onClick = {onDetailClick(clinic.id)},
+                    onClick = { onDetailClick(clinic.id) },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(8.dp),
                     border = BorderStroke(1.dp, primaryColor)

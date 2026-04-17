@@ -37,7 +37,7 @@ fun HospitalSection(
     viewModel: ClinicViewModel = hiltViewModel()
 ) {
     // 1. Quan sát danh sách phòng khám từ ViewModel
-    val clinics by viewModel.clinics.collectAsState()
+    val clinics by viewModel.filteredClinics.collectAsState()
 
     // 2. Chỉ lấy tối đa 15 items cho phần tiêu biểu ở Home để tối ưu hiệu năng
     val displayClinics = remember(clinics) {
