@@ -159,12 +159,18 @@ class BookingViewModel @Inject constructor(
                 it.copy(
                     selectedClinic = clinic,
                     isLoading = false,
+                    // ✅ Reset các field liên quan khi load clinic mới
+                    selectedSpecialty = "",
+                    selectedBookingType = "",
+                    selectedDate = "",
+                    selectedTime = "",
+                    isCancelled = false,
+                    isSuccess = false,
                     errorMessage = if (clinic == null) "Không tìm thấy cơ sở y tế" else null
                 )
             }
         }
     }
-
 //    private fun loadDoctorsBySpecialty() {
 //        viewModelScope.launch {
 //            val clinicId = _uiState.value.selectedClinic?.id ?: return@launch

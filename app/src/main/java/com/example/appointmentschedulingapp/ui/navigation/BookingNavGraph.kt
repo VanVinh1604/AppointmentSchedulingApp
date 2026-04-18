@@ -9,11 +9,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import androidx.navigation.navArgument
 import com.example.appointmentschedulingapp.ui.features.booking.*
 import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingStep1Screen
 import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingStep2Screen
@@ -48,21 +49,43 @@ fun NavGraphBuilder.bookingNavGraph(
                 }
             )
         }
+        composable(
+            route = "booking_step1_with_clinic/{clinicId}",
+            arguments = listOf(navArgument("clinicId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry("booking_graph")  // ✅ Giờ hoạt động
+            }
+            val bookingViewModel: BookingViewModel = hiltViewModel(parentEntry)
+            val uiState by bookingViewModel.uiState.collectAsState()
+            val clinicId = backStackEntry.arguments?.getString("clinicId") ?: ""
+
+            LaunchedEffect(clinicId) {
+                if (clinicId.isNotEmpty()) {
+                    bookingViewModel.onEvent(BookingEvent.LoadClinic(clinicId))
+                }
+            }
+
+            BookingStep1Screen(
+                uiState = uiState,
+                onBack = { navController.popBackStack() },
+                onNext = { navController.navigate(Screen.BookingStep2.route) },
+                onEvent = bookingViewModel::onEvent
+            )
+        }
+
 
         composable(Screen.BookingStep1.route) { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry("booking_graph")
             }
-
             val bookingViewModel: BookingViewModel = hiltViewModel(parentEntry)
             val uiState by bookingViewModel.uiState.collectAsState()
 
             BookingStep1Screen(
                 uiState = uiState,
                 onBack = { navController.popBackStack() },
-                onNext = {
-                    navController.navigate("booking_step2")
-                },
+                onNext = { navController.navigate(Screen.BookingStep2.route) },
                 onEvent = bookingViewModel::onEvent
             )
         }

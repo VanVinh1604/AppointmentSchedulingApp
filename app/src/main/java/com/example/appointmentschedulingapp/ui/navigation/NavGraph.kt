@@ -147,11 +147,16 @@ fun AppNavGraph(navController: NavHostController,
             ClinicDetailScreen(
                 clinicId = clinicId,
                 onBack = { navController.popBackStack() },
-//                onBookNow = {
-//                    navController.navigate(Screen.BookingStep1.route)
-//                }
+                onBookNow = { id ->  // ✅ nhận id từ lambda parameter
+                    // ✅ Navigate vào booking_graph trước, rồi mới đến route con
+                    navController.navigate("booking_graph") {
+                        launchSingleTop = true
+                    }
+                    navController.navigate("booking_step1_with_clinic/$id")
+                }
             )
         }
+
         composable(Screen.CreatePatientProfile.route) {
             CreatePatientProfileScreen(
                 onBack = { isCreated ->

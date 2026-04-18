@@ -33,6 +33,7 @@ import com.example.appointmentschedulingapp.ui.features.clinicDetail.components.
 fun ClinicDetailScreen(
     clinicId: String,
     onBack: () -> Unit,
+    onBookNow: (String) -> Unit,
     viewModel: ClinicDetailViewModel = hiltViewModel()
 ) {
     val clinic by viewModel.clinic.collectAsState()
@@ -43,8 +44,6 @@ fun ClinicDetailScreen(
 
     val primaryColor = Color(0xFF1976D2)
     var selectedTab by remember { mutableStateOf("Giới thiệu") }
-
-
 
     Scaffold(
         topBar = {
@@ -68,7 +67,7 @@ fun ClinicDetailScreen(
         bottomBar = {
             Surface(shadowElevation = 8.dp) {
                 Button(
-                    onClick = {},
+                    onClick = {onBookNow(clinicId)},
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
