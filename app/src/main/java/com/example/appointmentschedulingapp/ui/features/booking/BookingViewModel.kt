@@ -1,28 +1,31 @@
 package com.example.appointmentschedulingapp.ui.features.booking
 
+import android.content.Context
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.example.appointmentschedulingapp.domain.model.ConfirmBookingRequest
 import com.example.appointmentschedulingapp.domain.payment.momoPayment.MomoCallbackBus
 import com.example.appointmentschedulingapp.domain.payment.PaymentResult
-import com.example.appointmentschedulingapp.domain.repository.BookingRepository
 import com.example.appointmentschedulingapp.domain.usecase.bookingUscase.ConfirmBookingWithPaymentUseCase
-import com.example.appointmentschedulingapp.domain.usecase.bookingUscase.GetBookingByIdUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import com.example.appointmentschedulingapp.domain.usecase.clinicUsecase.GetClinicByIdUseCase
-import com.example.appointmentschedulingapp.domain.usecase.doctorUscase.GetDoctorsByClinicUseCase
 import com.example.appointmentschedulingapp.domain.usecase.patientUsecase.GetPatientProfilesUseCase
 import com.example.appointmentschedulingapp.domain.usecase.bookingUscase.GetBookingsUseCase
 import com.example.appointmentschedulingapp.domain.usecase.bookingUscase.ObserveBookingsUseCase
 import com.example.appointmentschedulingapp.domain.usecase.bookingUscase.UpdateBookingStatusUseCase
-
-import com.example.appointmentschedulingapp.ui.features.booking.steps.components.DEFAULT_PAYMENT_METHODS
 import com.example.appointmentschedulingapp.ui.features.tickets.BookingStatus
+import com.example.appointmentschedulingapp.workers.PaymentRetryWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,24 +33,19 @@ class BookingViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getClinicByIdUseCase: GetClinicByIdUseCase,
     private val confirmBookingWithPaymentUseCase: ConfirmBookingWithPaymentUseCase,
-    private val getDoctorsByClinicUseCase: GetDoctorsByClinicUseCase,
+//    private val getDoctorsByClinicUseCase: GetDoctorsByClinicUseCase,
     private val getPatientProfilesUseCase: GetPatientProfilesUseCase,
     private val getBookingsUseCase: GetBookingsUseCase,
-    private val getBookingByIdUseCase: GetBookingByIdUseCase,
     private val observeBookingsUseCase: ObserveBookingsUseCase,      // ← thêm
+    @ApplicationContext private val context: Context,
     private val updateBookingStatusUseCase: UpdateBookingStatusUseCase
 
 ) : ViewModel() {
 
-    private companion object {
-        const val TAG = "BookingViewModel"
-        const val POLLING_INTERVAL = 2000L // 2 giây
-        const val MAX_POLLING_ATTEMPTS = 15 // 30 giây tối đa
-    }
-
+    private var observeJob: kotlinx.coroutines.Job? = null
 
     init {
-        // ✅ Nếu app bị kill và restore, tự động observe booking đang pending
+        //  Nếu app bị kill và restore, tự động observe booking đang pending
         val pendingBookingId = savedStateHandle.get<String>("bookingId")
         val pendingMomoUrl = savedStateHandle.get<String>("momoPayUrl")
         if (!pendingBookingId.isNullOrEmpty() && !pendingMomoUrl.isNullOrEmpty()) {
@@ -55,16 +53,8 @@ class BookingViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            MomoCallbackBus.events.collect { orderId ->
-                val bookingId = if (orderId == "__momo_success__") {
-                    _uiState.value.bookingId
-                } else {
-                    orderId
-                }
-
-                if (bookingId.isNotEmpty()) {
-                    onMomoPaymentReturned(bookingId)
-                }
+            MomoCallbackBus.events.collect { (orderId, resultCode) ->
+                onMomoPaymentReturned(orderId, resultCode)
             }
         }
     }
@@ -236,24 +226,32 @@ class BookingViewModel @Inject constructor(
 
     private fun confirmBooking() {
         viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    isCancelled = false,
+                    errorMessage = null
+                )
+            }
             val state = _uiState.value
+
+            // ✅ Nếu đã có bookingId từ lần trước (re-try cùng booking)
+            // thì KHÔNG tạo mới, chỉ tạo lại payment URL
+            val existingBookingId = state.bookingId.ifEmpty { null }
 
             val request = ConfirmBookingRequest(
                 clinicId = state.selectedClinic?.id ?: "",
                 clinicName = state.selectedClinic?.name ?: "",
                 clinicAddress = state.selectedClinic?.address ?: "",
                 consultationFee = state.selectedClinic?.consultationFee ?: 0L,
-
                 patientId = state.selectedPatientId,
                 patientName = state.patientName,
-
                 specialty = state.selectedSpecialty,
                 service = state.selectedBookingType,
-
                 appointmentDate = state.selectedDate,
                 appointmentTime = state.selectedTime,
-
-                paymentMethod = state.selectedPaymentMethod
+                paymentMethod = state.selectedPaymentMethod,
+                existingBookingId = existingBookingId
             )
 
             confirmBookingWithPaymentUseCase(request)
@@ -280,6 +278,7 @@ class BookingViewModel @Inject constructor(
                         momoPayUrl = paymentResult.url
                     )
                 }
+                schedulePaymentRetry(paymentResult.bookingId)
                 observeBookingStatus(paymentResult.bookingId)
             }
 
@@ -304,60 +303,141 @@ class BookingViewModel @Inject constructor(
         }
     }
 
-//    fun isStep1Valid(): Boolean {
-//        val state = _uiState.value
-//        return state.selectedSpecialty.isNotBlank() &&
-//                state.selectedBookingType.isNotBlank() &&
-//                state.selectedDate.isNotBlank() &&
-//                state.selectedTime.isNotBlank()
-//    }
-//    fun validateStep1(): Boolean {
-//        val isValid = isStep1Valid()
-//
-//        _uiState.update {
-//            it.copy(
-//                step1Error = if (!isValid)
-//                    "Vui lòng chọn đầy đủ thông tin khám"
-//                else null
-//            )
-//        }
-//
-//        return isValid
-//    }
-    // BookingViewModel.kt
-private fun observeBookingStatus(bookingId: String) {
-    viewModelScope.launch {
-        getBookingsUseCase() // seed Room trước
+    private fun observeBookingStatus(bookingId: String) {
+        observeJob?.cancel()
+        observeJob = viewModelScope.launch {
+            observeBookingsUseCase()
+                .collect { bookings ->
+                    val booking = bookings.firstOrNull { it.id == bookingId } ?: return@collect
 
-        observeBookingsUseCase()
-            .collect { bookings ->
-                val booking = bookings.firstOrNull { it.id == bookingId } ?: return@collect
-                if (booking.status.name in listOf("PAID", "CONFIRMED", "COMPLETED")) {
-                    _uiState.update {
-                        it.copy(isLoading = false, isSuccess = true, bookingId = bookingId)
+                    val currentState = _uiState.value
+
+                    // ✅ Bỏ check errorMessage, chỉ giữ isSuccess
+                    // vì errorMessage != null sau cancel sẽ chặn cả lần thanh toán tiếp theo
+                    if (currentState.isSuccess) return@collect
+
+                    when (booking.status) {
+                        BookingStatus.PAID,
+                        BookingStatus.CONFIRMED,
+                        BookingStatus.COMPLETED -> {
+                            // ✅ Thêm check isCancelled để tránh overwrite
+                            if (currentState.isCancelled) return@collect
+
+                            savedStateHandle.remove<String>("bookingId")
+                            savedStateHandle.remove<String>("momoPayUrl")
+                            _uiState.update {
+                                it.copy(isLoading = false, isSuccess = true)
+                            }
+                            observeJob?.cancel()
+                        }
+
+                        BookingStatus.CANCELLED,
+                        BookingStatus.FAILED -> {
+                            savedStateHandle.remove<String>("bookingId")
+                            savedStateHandle.remove<String>("momoPayUrl")
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    isSuccess = false,
+                                    errorMessage = "Thanh toán thất bại"
+                                )
+                            }
+                            observeJob?.cancel()
+                        }
+
+                        else -> Unit
                     }
                 }
-            }
-    }
-}
+        }
 
-    fun onMomoPaymentReturned(bookingId: String) {
+        // Fallback timeout 15s
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            kotlinx.coroutines.delay(15_000)
+            // ✅ Thêm check isCancelled
+            if (_uiState.value.isLoading && !_uiState.value.isCancelled) {
+                _uiState.update {
+                    it.copy(isLoading = false, errorMessage = "Xác nhận quá lâu, vui lòng thử lại")
+                }
+            }
+        }
+    }
 
-            updateBookingStatusUseCase(bookingId, BookingStatus.CONFIRMED)
+    fun onMomoPaymentReturned(bookingId: String, resultCode: Int) {
+        viewModelScope.launch {
+            if (resultCode != 0) {
+                // ← Cancel observeJob TRƯỚC KHI update backend
+                observeJob?.cancel()
+                cancelPaymentRetryWorker(bookingId)
+                _uiState.update { it.copy(isLoading = true) }
+
+                updateBookingStatusUseCase(bookingId, BookingStatus.FAILED)
+                    .onSuccess {
+                        savedStateHandle.remove<String>("bookingId")
+                        savedStateHandle.remove<String>("momoPayUrl")
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                isSuccess = false,
+                                isCancelled = true,  // ← đánh dấu
+                                momoPayUrl = null,
+                                errorMessage = "Thanh toán MoMo thất bại (mã lỗi: $resultCode)"
+                            )
+                        }
+                    }
+                    .onFailure {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                isCancelled = true,  // ← vẫn đánh dấu dù update fail
+                                errorMessage = "Thanh toán thất bại, vui lòng thử lại"
+                            )
+                        }
+                    }
+                return@launch
+            }
+            cancelPaymentRetryWorker(bookingId)
+            // resultCode == 0 → success path (giữ nguyên)
+            _uiState.update { it.copy(isLoading = true) }
+            updateBookingStatusUseCase(bookingId, BookingStatus.PAID)
                 .onSuccess {
                     savedStateHandle.remove<String>("bookingId")
                     savedStateHandle.remove<String>("momoPayUrl")
                     _uiState.update {
-                        it.copy(isLoading = false, isSuccess = true, bookingId = bookingId)
+                        it.copy(
+                            isLoading = false,
+                            isSuccess = true,
+                            bookingId = bookingId,
+                            momoPayUrl = null
+                        )
                     }
                 }
-                .onFailure { error ->
-                    _uiState.update {
-                        it.copy(isLoading = false, errorMessage = "Lỗi xác nhận thanh toán: ${error.message}")
-                    }
+                .onFailure {
+                    observeBookingStatus(bookingId)
                 }
         }
+    }
+
+    fun checkPendingPayment(bookingId: String) {
+        if (_uiState.value.isLoading || _uiState.value.isSuccess || _uiState.value.isCancelled) return
+        _uiState.update { it.copy(isLoading = true) }
+        observeBookingStatus(bookingId)
+    }
+
+    // Thêm tag khi schedule
+    private fun schedulePaymentRetry(bookingId: String) {
+        val tag = "payment_retry_$bookingId"  // ✅ tag theo bookingId
+        val workRequest = OneTimeWorkRequestBuilder<PaymentRetryWorker>()
+            .setInputData(workDataOf("booking_id" to bookingId))
+            .setInitialDelay(2, TimeUnit.MINUTES)
+            .addTag(tag)  // ✅ thêm tag
+            .build()
+        WorkManager.getInstance(context).enqueue(workRequest)
+    }
+
+    // Thêm helper để cancel worker
+    private fun cancelPaymentRetryWorker(bookingId: String) {
+        WorkManager.getInstance(context)
+            .cancelAllWorkByTag("payment_retry_$bookingId")
+        Log.d("BookingViewModel", "Cancelled PaymentRetryWorker for $bookingId")
     }
 }

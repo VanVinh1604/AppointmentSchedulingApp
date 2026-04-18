@@ -15,5 +15,6 @@ data class ConfirmBookingRequest(
     val appointmentDate: String,
     val appointmentTime: String,
 
+    val existingBookingId: String? = null,
     val paymentMethod: String
 )

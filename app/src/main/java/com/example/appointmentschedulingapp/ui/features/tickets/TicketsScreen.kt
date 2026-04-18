@@ -28,155 +28,167 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.example.appointmentschedulingapp.domain.model.Booking
+import com.example.appointmentschedulingapp.ui.components.login.AppScreen
 import com.example.appointmentschedulingapp.ui.features.tickets.components.BookingCard
 import com.example.appointmentschedulingapp.ui.features.tickets.components.StatusUi
+import com.example.appointmentschedulingapp.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TicketsScreen(
+    isLoggedIn: Boolean,
+    navController: NavHostController,
     onViewDetail: (Booking) -> Unit = {},
     viewModel: TicketsViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val colorScheme = MaterialTheme.colorScheme
+    AppScreen(
+        requiresLogin = true, // Màn hình phiếu khám nên yêu cầu login để bảo mật
+        isLoggedIn = isLoggedIn,
+        onNavigateToLogin = { navController.navigate(Screen.Auth.route) } // Dùng Screen.Auth.route cho đồng bộ
+    ) {
 
-    Scaffold(
-        topBar = {
-            val primaryBlue = Color(0xFF1976D2)
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+        val colorScheme = MaterialTheme.colorScheme
 
-            CenterAlignedTopAppBar(
-                title = {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "Phiếu khám",
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold
-                            )
-                        )
-                        Text(
-                            text = "${uiState.bookings.size} lịch hẹn",
-                            color = Color.White.copy(alpha = 0.85f),
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        // TODO back
-                    }) {
-                        Icon(
-                            Icons.Default.ArrowBack,
-                            contentDescription = null,
-                            tint = Color.White
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = {
-                        viewModel.loadBookings()
-                    }) {
-                        Icon(
-                            Icons.Default.Refresh,
-                            contentDescription = null,
-                            tint = Color.White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = primaryBlue
-                )
-            )
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(colorScheme.surfaceVariant.copy(alpha = 0.3f))
-        ) {
-            // ── Filter chips ─────────────────────────────────────────────────
-            LazyRow(
-                modifier = Modifier
-                    .background(colorScheme.surface)
-                    .padding(vertical = 10.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(TicketFilter.entries) { filter ->
-                    val selected = uiState.selectedFilter == filter
-                    FilterChip(
-                        selected = selected,
-                        onClick = { viewModel.selectFilter(filter) },
-                        label = {
+        Scaffold(
+            topBar = {
+                val primaryBlue = Color(0xFF1976D2)
+
+                CenterAlignedTopAppBar(
+                    title = {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
                             Text(
-                                filter.label,
-                                style = MaterialTheme.typography.labelMedium
+                                text = "Phiếu khám",
+                                color = Color.White,
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold
+                                )
                             )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = colorScheme.primary,
-                            selectedLabelColor = colorScheme.onPrimary,
-                            containerColor = colorScheme.surfaceVariant,
-                            labelColor = colorScheme.onSurfaceVariant
-                        ),
-                        border = null,
-                        shape = RoundedCornerShape(20.dp)
+                            Text(
+                                text = "${uiState.bookings.size} lịch hẹn",
+                                color = Color.White.copy(alpha = 0.85f),
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            // TODO back
+                        }) {
+                            Icon(
+                                Icons.Default.ArrowBack,
+                                contentDescription = null,
+                                tint = Color.White
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = {
+                            viewModel.loadBookings()
+                        }) {
+                            Icon(
+                                Icons.Default.Refresh,
+                                contentDescription = null,
+                                tint = Color.White
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = primaryBlue
                     )
-                }
+                )
             }
-
-            // ── Content ──────────────────────────────────────────────────────
-            PullToRefreshBox(
-                isRefreshing = uiState.isLoading,
-                onRefresh = viewModel::loadBookings,
-                modifier = Modifier.fillMaxSize()
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(colorScheme.surfaceVariant.copy(alpha = 0.3f))
             ) {
-                AnimatedContent(
-                    targetState = uiState,
-                    transitionSpec = { fadeIn() togetherWith fadeOut() },
-                    label = "tickets_content"
-                ) { state ->
-                    when {
-                        state.isLoading && state.bookings.isEmpty() -> {
-                            LoadingState()
-                        }
+                // ── Filter chips ─────────────────────────────────────────────────
+                LazyRow(
+                    modifier = Modifier
+                        .background(colorScheme.surface)
+                        .padding(vertical = 10.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(TicketFilter.entries) { filter ->
+                        val selected = uiState.selectedFilter == filter
+                        FilterChip(
+                            selected = selected,
+                            onClick = { viewModel.selectFilter(filter) },
+                            label = {
+                                Text(
+                                    filter.label,
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                            },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = colorScheme.primary,
+                                selectedLabelColor = colorScheme.onPrimary,
+                                containerColor = colorScheme.surfaceVariant,
+                                labelColor = colorScheme.onSurfaceVariant
+                            ),
+                            border = null,
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                    }
+                }
 
-                        state.errorMessage != null -> {
-                            ErrorState(
-                                message = state.errorMessage,
-                                onRetry = viewModel::loadBookings
-                            )
-                        }
+                // ── Content ──────────────────────────────────────────────────────
+                PullToRefreshBox(
+                    isRefreshing = uiState.isLoading,
+                    onRefresh = viewModel::loadBookings,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    AnimatedContent(
+                        targetState = uiState,
+                        transitionSpec = { fadeIn() togetherWith fadeOut() },
+                        label = "tickets_content"
+                    ) { state ->
+                        when {
+                            state.isLoading && state.bookings.isEmpty() -> {
+                                LoadingState()
+                            }
 
-                        state.filteredBookings.isEmpty() -> {
-                            EmptyState(filter = state.selectedFilter)
-                        }
+                            state.errorMessage != null -> {
+                                ErrorState(
+                                    message = state.errorMessage,
+                                    onRetry = viewModel::loadBookings
+                                )
+                            }
 
-                        else -> {
-                            LazyColumn(
-                                contentPadding = PaddingValues(
-                                    horizontal = 16.dp,
-                                    vertical = 12.dp
-                                ),
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                items(
-                                    items = state.filteredBookings,
-                                    key = { it.id }
-                                ) { booking ->
-                                    BookingCard(
-                                        booking = booking,
-                                        onClick = {
-                                            viewModel.selectBooking(booking)
-                                            onViewDetail(booking)
-                                        }
-                                    )
+                            state.filteredBookings.isEmpty() -> {
+                                EmptyState(filter = state.selectedFilter)
+                            }
+
+                            else -> {
+                                LazyColumn(
+                                    contentPadding = PaddingValues(
+                                        horizontal = 16.dp,
+                                        vertical = 12.dp
+                                    ),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    items(
+                                        items = state.filteredBookings,
+                                        key = { it.id }
+                                    ) { booking ->
+                                        BookingCard(
+                                            booking = booking,
+                                            onClick = {
+                                                viewModel.selectBooking(booking)
+                                                onViewDetail(booking)
+                                            }
+                                        )
+                                    }
+                                    item { Spacer(Modifier.height(80.dp)) }
                                 }
-                                item { Spacer(Modifier.height(80.dp)) }
                             }
                         }
                     }
@@ -186,20 +198,13 @@ fun TicketsScreen(
     }
 }
 
-// ── Booking Card ──────────────────────────────────────────────────────────────
-
-
-
-// ── Status Badge ──────────────────────────────────────────────────────────────
-
-
 
 
 fun BookingStatus.toUi(): StatusUi = when (this) {
-    BookingStatus.PENDING   -> StatusUi(label, Icons.Outlined.HourglassEmpty)
+    BookingStatus.PENDING_PAYMENT   -> StatusUi(label, Icons.Outlined.HourglassEmpty)
     BookingStatus.CONFIRMED -> StatusUi(label, Icons.Outlined.CheckCircle)
-    BookingStatus.UNPAID    -> StatusUi(label, Icons.Outlined.Payment)
     BookingStatus.PAID      -> StatusUi(label, Icons.Outlined.TaskAlt)
+    BookingStatus.FAILED    -> StatusUi(label, Icons.Outlined.ErrorOutline)
     BookingStatus.COMPLETED -> StatusUi(label, Icons.Outlined.MedicalServices)
     BookingStatus.CANCELLED -> StatusUi(label, Icons.Outlined.Cancel)
 }

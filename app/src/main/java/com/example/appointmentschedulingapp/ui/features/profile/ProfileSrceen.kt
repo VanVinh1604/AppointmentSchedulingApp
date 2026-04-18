@@ -24,94 +24,113 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.example.appointmentschedulingapp.domain.model.PatientProfile
+import com.example.appointmentschedulingapp.ui.components.login.AppScreen
+import com.example.appointmentschedulingapp.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
+    isLoggedIn: Boolean,
+    navController: NavHostController,
     onNavigateToCreateProfile: () -> Unit,
     onNavigateToDetail: (String) -> Unit
 ) {
-    val viewModel: ProfileViewModel = hiltViewModel()
-    val uiState by viewModel.uiState.collectAsState()
+    AppScreen(
+        requiresLogin = true,
+        isLoggedIn = isLoggedIn,
+        onNavigateToLogin = { navController.navigate(Screen.Auth.route) }
+    ) {
+        val viewModel: ProfileViewModel = hiltViewModel()
+        val uiState by viewModel.uiState.collectAsState()
 
-    val primaryColor = Color(0xFF1976D2)
-    val lightBlueBg = Color(0xFFE3F2FD).copy(alpha = 0.8f)
-    val darkBlueText = Color(0xFF1565C0)
+        val primaryColor = Color(0xFF1976D2)
+        val lightBlueBg = Color(0xFFE3F2FD).copy(alpha = 0.8f)
+        val darkBlueText = Color(0xFF1565C0)
 
-    // Reload khi quay lại từ CreateProfile
-    LaunchedEffect(Unit) {
-        viewModel.loadProfiles()
-    }
-
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        "Hồ sơ bệnh nhân",
-                        color = Color.White,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { /* Quay lại */ }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
-                    }
-                },
-                actions = {
-                    IconButton(onClick = onNavigateToCreateProfile) {
-                        Icon(Icons.Default.PersonAdd, contentDescription = null, tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = primaryColor)
-            )
+        // Reload khi quay lại từ CreateProfile
+        LaunchedEffect(Unit) {
+            viewModel.loadProfiles()
         }
-    ) { paddingValues ->
-        when {
-            uiState.isLoading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = primaryColor)
-                }
-            }
 
-            uiState.profiles.isNotEmpty() -> {
-                // --- CÓ HỒ SƠ: Hiển thị danh sách ---
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .background(Color(0xFFF5F5F5)),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(uiState.profiles) { profile ->
-                        PatientProfileItem(
-                            profile = profile,
-                            primaryColor = primaryColor,
-                            darkBlueText = darkBlueText,
-                            lightBlueBg = lightBlueBg,
-                            onClick = { onNavigateToDetail(profile.id) }  // ← thêm
-
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            "Hồ sơ bệnh nhân",
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleMedium
                         )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { /* Quay lại */ }) {
+                            Icon(
+                                Icons.Default.ArrowBack,
+                                contentDescription = null,
+                                tint = Color.White
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = onNavigateToCreateProfile) {
+                            Icon(
+                                Icons.Default.PersonAdd,
+                                contentDescription = null,
+                                tint = Color.White
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = primaryColor)
+                )
+            }
+        ) { paddingValues ->
+            when {
+                uiState.isLoading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = primaryColor)
                     }
                 }
-            }
 
-            else -> {
-                // --- KHÔNG CÓ HỒ SƠ: Hiển thị màn hình trống như cũ ---
-                EmptyProfileContent(
-                    paddingValues = paddingValues,
-                    primaryColor = primaryColor,
-                    lightBlueBg = lightBlueBg,
-                    darkBlueText = darkBlueText,
-                    onCreateNew = onNavigateToCreateProfile
-                )
+                uiState.profiles.isNotEmpty() -> {
+                    // --- CÓ HỒ SƠ: Hiển thị danh sách ---
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .background(Color(0xFFF5F5F5)),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(uiState.profiles) { profile ->
+                            PatientProfileItem(
+                                profile = profile,
+                                primaryColor = primaryColor,
+                                darkBlueText = darkBlueText,
+                                lightBlueBg = lightBlueBg,
+                                onClick = { onNavigateToDetail(profile.id) }  // ← thêm
+
+                            )
+                        }
+                    }
+                }
+
+                else -> {
+                    // --- KHÔNG CÓ HỒ SƠ: Hiển thị màn hình trống như cũ ---
+                    EmptyProfileContent(
+                        paddingValues = paddingValues,
+                        primaryColor = primaryColor,
+                        lightBlueBg = lightBlueBg,
+                        darkBlueText = darkBlueText,
+                        onCreateNew = onNavigateToCreateProfile
+                    )
+                }
             }
         }
     }

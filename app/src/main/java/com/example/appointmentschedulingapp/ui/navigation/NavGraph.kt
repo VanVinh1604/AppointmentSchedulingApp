@@ -36,8 +36,11 @@ fun AppNavGraph(navController: NavHostController,
 
     ) {
 
-        bookingNavGraph(navController)
-        ticketsNavGraph(navController)
+        bookingNavGraph(isLoggedIn = session.isLoggedIn, navController = navController)
+        ticketsNavGraph(
+            navController = navController,
+            isLoggedIn = session.isLoggedIn
+        )
 
         // Màn hình Home đã có file riêng
         composable(Screen.Home.route) {
@@ -116,11 +119,20 @@ fun AppNavGraph(navController: NavHostController,
                 viewModel = authViewModel,
                 onBack = { navController.popBackStack() },
                 onSuccess = {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Auth.route) { inclusive = true }
+                    val hasPreviousScreen = navController.previousBackStackEntry != null
+
+                    if (hasPreviousScreen) {
+                        navController.popBackStack(
+                            route = Screen.Auth.route,
+                            inclusive = true
+                        )
+                    } else {
+                        // Nếu không có backstack (vào thẳng Login), về Home
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(0)
+                        }
                     }
                 }
-
             )
         }
 
@@ -177,7 +189,9 @@ fun AppNavGraph(navController: NavHostController,
                 },
                 onNavigateToDetail = { profileId ->           // ← thêm
                     navController.navigate(Screen.ProfileDetail.createRoute(profileId))
-                }
+                },
+                isLoggedIn = session.isLoggedIn,
+                navController = navController
             )
         }
 

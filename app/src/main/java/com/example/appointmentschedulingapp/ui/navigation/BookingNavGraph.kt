@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -22,6 +23,7 @@ import com.example.appointmentschedulingapp.ui.features.booking.steps.BookingRec
 
 
 fun NavGraphBuilder.bookingNavGraph(
+    isLoggedIn: Boolean,
     navController: NavHostController
 ) {
     navigation(
@@ -97,7 +99,9 @@ fun NavGraphBuilder.bookingNavGraph(
                 onBack = { navController.popBackStack() },
                 onCreatePatient = {
                     navController.navigate(Screen.CreatePatientProfile.route)
-                }
+                },
+                isLoggedIn = isLoggedIn,
+                navController = navController
             )
         }
 
@@ -117,14 +121,10 @@ fun NavGraphBuilder.bookingNavGraph(
                 onConfirm = {
                     navController.navigate(Screen.BookingStep4.route)
                 }
+
             )
         }
 
-        // bookingNavGraph.kt
-
-        // bookingNavGraph.kt
-
-        // bookingNavGraph.kt
 
         composable(
             route = Screen.BookingStep4.route
@@ -140,9 +140,15 @@ fun NavGraphBuilder.bookingNavGraph(
             // ✅ Bỏ LaunchedEffect(orderId) — MomoCallbackBus trong ViewModel xử lý
 
             // Khi isSuccess thay đổi, chuyển trang sang Receipt
-            LaunchedEffect(uiState.isSuccess) {
-                if (uiState.isSuccess) {  // ✅ Bỏ điều kiện orderId != null
+            LaunchedEffect(uiState.isSuccess, uiState.errorMessage) {
+
+                val isSuccess = uiState.isSuccess
+                val isError = uiState.errorMessage != null
+
+                // 🔥 CHẶN navigate nếu có lỗi (cancel)
+                if (isSuccess && !isError) {
                     android.util.Log.d("BookingNavGraph", "Payment verified! Navigating to receipt")
+
                     navController.navigate(Screen.BookingReceipt.route) {
                         popUpTo("booking_graph") { inclusive = false }
                         launchSingleTop = true
@@ -170,8 +176,10 @@ fun NavGraphBuilder.bookingNavGraph(
                         launchSingleTop = true
                     }
                 },
+                // Trong NavGraph / nơi gọi BookingStep4Screen:
                 onVerifyPayment = { bookingId ->
-                    bookingViewModel.onMomoPaymentReturned(bookingId)
+                    // Không có resultCode → chỉ observe Firebase để kiểm tra trạng thái
+                    bookingViewModel.checkPendingPayment(bookingId)
                 }
             )
         }

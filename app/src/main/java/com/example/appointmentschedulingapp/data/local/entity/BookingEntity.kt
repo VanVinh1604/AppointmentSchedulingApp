@@ -30,7 +30,7 @@ data class BookingEntity(
     val appointmentTime: String = "",
     val consultationFee: Long = 0L,
     val paymentMethod: String = "",
-    val status: String = BookingStatus.PENDING.name,
+    val status: String = BookingStatus.PENDING_PAYMENT.name,
     val createdAt: Long = System.currentTimeMillis(),
 
     val synced: Boolean = false

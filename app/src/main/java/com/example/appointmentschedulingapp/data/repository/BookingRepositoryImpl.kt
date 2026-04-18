@@ -194,7 +194,7 @@ class BookingRepositoryImpl @Inject constructor(
             paymentMethod = child("paymentMethod").getValue(String::class.java) ?: "",
             status = runCatching {
                 BookingStatus.valueOf(child("status").getValue(String::class.java) ?: "")
-            }.getOrDefault(BookingStatus.PENDING),
+            }.getOrDefault(BookingStatus.PENDING_PAYMENT),
             createdAt = child("createdAt").getValue(Long::class.java) ?: System.currentTimeMillis()
         )
     }.getOrNull()

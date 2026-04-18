@@ -39,6 +39,6 @@ fun BookingEntity.toDomain() = Booking(
     appointmentTime = appointmentTime, consultationFee = consultationFee,
     paymentMethod = paymentMethod,
     status = runCatching { BookingStatus.valueOf(status) }
-        .getOrDefault(BookingStatus.PENDING),
+        .getOrDefault(BookingStatus.PENDING_PAYMENT),
     createdAt = createdAt
 )

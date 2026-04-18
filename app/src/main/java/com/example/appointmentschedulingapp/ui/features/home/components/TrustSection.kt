@@ -41,7 +41,7 @@ fun TrustSectionNew(
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
         ) {
-            clinics.forEach { clinic ->
+            clinics.take(5).forEach { clinic ->
                 PartnerItem(clinic)
             }
         }

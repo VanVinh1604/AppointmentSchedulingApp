@@ -32,6 +32,6 @@ data class Booking(
     val consultationFee: Long = 0L,
     val paymentMethod: String = "",
 
-    val status: BookingStatus = BookingStatus.PENDING,
+    val status: BookingStatus = BookingStatus.PENDING_PAYMENT,
     val createdAt: Long = System.currentTimeMillis()
 )

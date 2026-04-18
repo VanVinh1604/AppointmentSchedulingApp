@@ -24,7 +24,7 @@ fun StatusBadge(statusUi: StatusUi) {
     // Map BookingStatus visually
     val (containerColor, contentColor) = when (statusUi.label) {
         BookingStatus.CONFIRMED.label -> colorScheme.primaryContainer to colorScheme.primary
-        BookingStatus.UNPAID.label    -> MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.error
+        BookingStatus.FAILED.label    -> MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.error
         BookingStatus.PAID.label      -> colorScheme.tertiaryContainer to colorScheme.tertiary
         BookingStatus.COMPLETED.label -> colorScheme.secondaryContainer to colorScheme.secondary
         BookingStatus.CANCELLED.label -> colorScheme.surfaceVariant to colorScheme.outline

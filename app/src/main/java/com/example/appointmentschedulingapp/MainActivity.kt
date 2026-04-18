@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -118,7 +119,11 @@ class MainActivity : ComponentActivity() {
         if (data.scheme == "appointmentschedulingapp" && data.host == "momo") {
             when (data.path) {
                 "/success" -> {
-                    // ✅ Lấy bookingId thật từ extraData (đã encode base64)
+                    // ✅ MoMo luôn callback về /success, phải đọc resultCode thật
+                    val resultCode = data.getQueryParameter("resultCode")?.toIntOrNull() ?: -1
+                    val orderId = data.getQueryParameter("orderId") ?: return
+
+                    // Decode bookingId từ extraData
                     val extraData = data.getQueryParameter("extraData")
                     val bookingId = if (!extraData.isNullOrEmpty()) {
                         try {
@@ -128,13 +133,31 @@ class MainActivity : ComponentActivity() {
                         }
                     } else null
 
-                    Log.d(TAG, "MoMo SUCCESS, bookingId from extraData: $bookingId")
+                    Log.d(TAG, "MoMo callback resultCode=$resultCode, bookingId=$bookingId, orderId=$orderId")
 
-                    val finalBookingId = bookingId ?: "__momo_success__"
-                    MomoCallbackBus.emit(finalBookingId)
+                    if (resultCode == 0) {
+                        // ✅ Thành công thật sự
+                        val finalBookingId = bookingId ?: orderId
+                        Log.d(TAG, "MoMo SUCCESS, bookingId: $finalBookingId")
+                        MomoCallbackBus.emit(finalBookingId, resultCode = 0)
+                    } else {
+                        // ✅ Thất bại hoặc bị hủy (resultCode 1006, 1005, v.v.)
+                        Log.d(TAG, "MoMo FAILED/CANCELLED via /success path, resultCode=$resultCode")
+                        MomoCallbackBus.emit(orderId, resultCode = resultCode)
+                    }
                 }
+
                 "/cancel" -> {
-                    Log.d(TAG, "MoMo CANCEL")
+                    Log.d(TAG, "MoMo CANCEL path")
+                    val orderId = data.getQueryParameter("orderId") ?: return
+                    MomoCallbackBus.emit(orderId, resultCode = 9000)
+                }
+
+                "/failed" -> {
+                    val orderId = data.getQueryParameter("orderId") ?: return
+                    val resultCode = data.getQueryParameter("resultCode")?.toIntOrNull() ?: -1
+                    Log.d(TAG, "MoMo FAILED path, resultCode=$resultCode")
+                    MomoCallbackBus.emit(orderId, resultCode)
                 }
             }
         }

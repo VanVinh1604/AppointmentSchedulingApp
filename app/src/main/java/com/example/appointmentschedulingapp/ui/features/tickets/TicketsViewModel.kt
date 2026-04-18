@@ -106,7 +106,7 @@ class TicketsViewModel @Inject constructor(
         return when (filter) {
             TicketFilter.ALL -> active
             TicketFilter.UNPAID -> active.filter {
-                it.status == BookingStatus.UNPAID || it.status == BookingStatus.CONFIRMED
+                it.status == BookingStatus.FAILED || it.status == BookingStatus.CONFIRMED
             }
             TicketFilter.PAID -> active.filter { it.status == BookingStatus.PAID }
             TicketFilter.COMPLETED -> active.filter { it.status == BookingStatus.COMPLETED }

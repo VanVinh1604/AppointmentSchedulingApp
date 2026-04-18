@@ -3,6 +3,7 @@ package com.example.appointmentschedulingapp.ui.navigation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -17,7 +18,7 @@ import com.example.appointmentschedulingapp.ui.features.tickets.TicketDetailScre
 import com.example.appointmentschedulingapp.ui.features.tickets.TicketsScreen
 import com.example.appointmentschedulingapp.ui.features.tickets.TicketsViewModel
 
-fun NavGraphBuilder.ticketsNavGraph(navController: NavHostController) {
+fun NavGraphBuilder.ticketsNavGraph(isLoggedIn: Boolean,navController: NavHostController) {
     navigation(
         route = "tickets_graph",
         startDestination = Screen.Ticket.route
@@ -30,6 +31,8 @@ fun NavGraphBuilder.ticketsNavGraph(navController: NavHostController) {
             val vm: TicketsViewModel = hiltViewModel(parentEntry)
 
             TicketsScreen(
+                isLoggedIn = isLoggedIn, // Truyền trạng thái login
+                navController = navController,
                 viewModel = vm,
                 onViewDetail = { booking ->
                     vm.selectBooking(booking)
@@ -41,30 +44,25 @@ fun NavGraphBuilder.ticketsNavGraph(navController: NavHostController) {
         }
 
         composable(Screen.TicketDetail.route) { backStackEntry ->
-            val bookingId = backStackEntry.arguments
-                ?.getString("bookingId")
-                ?: return@composable
+            val bookingId = backStackEntry.arguments?.getString("bookingId") ?: return@composable
 
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry("tickets_graph")
             }
-
             val vm: TicketsViewModel = hiltViewModel(parentEntry)
             val uiState by vm.uiState.collectAsState()
 
-            // Ưu tiên dùng selectedBooking (đã được lưu khi click)
-            // Nếu không có, sẽ tìm từ danh sách bookings
-            // Nếu vẫn không có, sẽ load từ repository
-            val booking = uiState.selectedBooking
-                ?: uiState.bookings.find { it.id == bookingId }
-                ?: run {
-                    // Load booking nếu không có trong state
-                    remember(bookingId) {
-                        vm.loadBookingById(bookingId)
-                    }
-                    null
-                }
+            // 1. Tìm booking từ state hiện tại
+            val booking = uiState.selectedBooking ?: uiState.bookings.find { it.id == bookingId }
 
+            // 2. Nếu không tìm thấy, dùng LaunchedEffect để kích hoạt việc load dữ liệu từ Repository
+            if (booking == null) {
+                LaunchedEffect(bookingId) {
+                    vm.loadBookingById(bookingId)
+                }
+            }
+
+            // 3. Hiển thị UI tương ứng
             if (booking != null) {
                 TicketDetailScreen(
                     booking = booking,
@@ -75,6 +73,7 @@ fun NavGraphBuilder.ticketsNavGraph(navController: NavHostController) {
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
+                    // Có thể thêm CircularProgressIndicator ở đây cho đẹp
                     Text("Đang tải thông tin phiếu khám...")
                 }
             }

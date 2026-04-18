@@ -112,6 +112,7 @@ fun HospitalItem(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(clinic.imageUrl) // Link Cloudinary từ Firebase
                     .crossfade(true) // Hiệu ứng hiện ảnh mượt mà
+                    .allowHardware(false)
                     .build(),
                 contentDescription = clinic.name,
                 modifier = Modifier

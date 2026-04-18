@@ -1,7 +1,6 @@
 package com.example.appointmentschedulingapp.ui.features.booking.steps
 
-import android.content.Intent
-import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -64,6 +64,7 @@ fun BookingStep4Screen(
         }
     }
 
+
     // Mở MoMo URL khi ViewModel trả về Redirect URL
     LaunchedEffect(uiState.momoPayUrl) {
         uiState.momoPayUrl?.let {
@@ -71,8 +72,15 @@ fun BookingStep4Screen(
         }
     }
 
-    // BookingStep4Screen.kt - thêm LaunchedEffect theo lifecycle
-    // BookingStep4Screen.kt
+    val context = LocalContext.current
+
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
 
 // ✅ Dùng rememberUpdatedState để luôn có giá trị mới nhất
@@ -84,13 +92,16 @@ fun BookingStep4Screen(
                 val bookingId = currentUiState.bookingId
                 val hasMomoUrl = currentUiState.momoPayUrl != null
                 val notSuccess = !currentUiState.isSuccess
+                val notCancelled = !currentUiState.isCancelled
 
                 android.util.Log.d(
                     "BookingStep4",
-                    "onResume: bookingId=$bookingId, hasMomoUrl=$hasMomoUrl, notSuccess=$notSuccess"
+                    "onResume: bookingId=$bookingId, hasMomoUrl=$hasMomoUrl, notSuccess=$notSuccess, errorMessage=${currentUiState.errorMessage}"
                 )
 
-                if (bookingId.isNotEmpty() && hasMomoUrl && notSuccess) {
+                val hasError = currentUiState.errorMessage != null
+
+                if (bookingId.isNotEmpty() && hasMomoUrl && notSuccess && !hasError) {
                     onVerifyPayment(bookingId)
                 }
             }
@@ -215,6 +226,13 @@ fun BookingStep4Screen(
         }
     }
 
+    if (uiState.errorMessage != null) {
+        Text(
+            text = uiState.errorMessage,
+            color = Color.Red,
+            fontSize = 13.sp
+        )
+    }
     // Bottom Sheet (giữ nguyên code cũ của bạn)
     if (showAllSheet) {
         PaymentBottomSheet(

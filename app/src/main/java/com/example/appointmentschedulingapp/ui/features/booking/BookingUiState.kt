@@ -9,6 +9,7 @@ data class BookingUiState(
     val bookingId: String = "",
     val isLoading: Boolean = false,
     val isSuccess: Boolean = false,
+    val isCancelled: Boolean = false,
     val errorMessage: String? = null,
     val step1Error: String? = null,
     val selectedBookingType: String = "",

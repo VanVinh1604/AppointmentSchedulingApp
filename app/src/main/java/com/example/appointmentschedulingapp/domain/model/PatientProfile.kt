@@ -24,6 +24,7 @@ data class PatientProfile(
     val medicalHistory: String = "",
 
     val qrCodeUrl: String = "",
+
     val avatarUrl: String = "",
 
     val isDefault: Boolean = false,
